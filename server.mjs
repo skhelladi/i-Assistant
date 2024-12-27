@@ -2,7 +2,6 @@ import express from 'express';
 import ollama from 'ollama';
 import modelsRouter from './routes/models.js';
 import chatRouter from './routes/chat.js';
-import mainRouter from './routes/mainRouter.js';
 
 const app = express(); // Express instance
 const port = 3000; // Listening port
