@@ -2,6 +2,8 @@
 
 i-@ssistant is a web-based AI assistant application that allows users to interact with various models to obtain solutions to their queries. This application serves as a graphical interface for [Ollama](https://ollama.com/) using free LLMs. The backend server is responsible for model management and processing.
 
+![i-@ssistant](assets/gui.png)
+
 ## Features
 
 - Interactive chat interface
