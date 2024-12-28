@@ -11,7 +11,6 @@ i-@ssistant is a web-based AI assistant application that allows users to interac
 - Streamed responses
 - Retry and stop functionality
 - Settings for customization
-- About modal with application information
 - Copy and paste functionality
 - Save answers to a text/markdown file
 
