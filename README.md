@@ -53,7 +53,7 @@ The server will start and listen on port 3000. You can access the application by
 - **Send Message**: Enter your message in the input field and click the send button to interact with the AI assistant.
 - **Stop Request**: Click the stop button to stop the ongoing response generation.
 - **Retry**: Click the retry button to resend the last user message and get a new response.
-- **Settings**: Click the settings button to customize the stream, temperature, and system content.
+- **Settings**: Click the settings button to customize the stream, temperature, and model context.
 
 ## License
 
