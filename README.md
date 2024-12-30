@@ -24,8 +24,8 @@ i-@ssistant serves as a graphical interface for [Ollama](https://ollama.com/) us
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/ollama_gui.git
-cd ollama_gui
+git clone https://github.com/skhelladi/i-assistant.git
+cd i-assistant
 ```
 
 ### Install Dependencies
