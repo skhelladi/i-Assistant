@@ -105,45 +105,52 @@ body.light-mode .action-button,
 body.light-mode .copy-button,
 body.light-mode .edit-button,
 body.light-mode .save-button {
-    background: #333; /* Use the same background color as in dark mode */
-    color: #fff; /* Use the same text color as in dark mode */
+    background: #e3f2fd; /* Lighter background for better visibility */
+    color: #0d47a1;
 }
 
 body.light-mode .action-button:hover,
 body.light-mode .copy-button:hover,
 body.light-mode .edit-button:hover,
 body.light-mode .save-button:hover {
-    background: #444; /* Use the same hover background color as in dark mode */
+    background: #9bacdd; /* Lighter hover background */
 }
 
 /* Specific colors for send, stop, and retry buttons in light mode */
 body.light-mode .action-button.send {
-    background: #2563eb; /* Blue */
+    background: #9bacdd; /* Blue */
 }
 
 body.light-mode .action-button.send:hover {
-    background: #1d4ed8;
+    background: #708ad8;
 }
 
 body.light-mode .action-button.stop {
-    background: #dc2626; /* Red */
+    background: #d3a6a6; /* Red */
 }
 
 body.light-mode .action-button.stop:hover {
-    background: #ef4444;
+    background: #d3a6a6;
 }
 
 body.light-mode .action-button.retry {
-    background: #059669; /* Green */
+    background: #89c9b5; /* Green */
 }
 
 body.light-mode .action-button.retry:hover {
-    background: #10b981;
+    background: #49c59e;
 }
 
 body.light-mode .action-button:disabled {
-    background: #555;
+    background: #999999;
     cursor: not-allowed;
+}
+
+body.light-mode .action-button svg,
+body.light-mode .copy-button svg,
+body.light-mode .edit-button svg,
+body.light-mode .save-button svg {
+    fill: #0d47a1; /* Dark blue for better visibility */
 }
 
 /* Layout containers */
@@ -386,20 +393,20 @@ form {
 .delete-button svg {
     width: 16px;
     height: 16px;
-    fill: #dc2626; /* Red */
+    fill:  #888; /* Red */
 }
 
 .delete-button:hover svg {
-    fill: #ef4444; /* Lighter red on hover */
+    fill:  #888; /* Lighter red on hover */
 }
 
 /* Light mode styles for delete button */
 body.light-mode .delete-button svg {
-    fill: #ef4444;
+    fill:  #888; /* Red */
 }
 
 body.light-mode .delete-button:hover svg {
-    fill: #dc2626;
+    fill:  #888; /* Lighter red on hover */
 }
 
 /* Messages */
@@ -999,11 +1006,11 @@ body.light-mode #settings-form .pagination-button[type="button"]:hover {
 
 /* Light mode styles for delete button */
 body.light-mode .delete-button svg {
-    fill: #666;
+    fill:  #888; /* Red */
 }
 
 body.light-mode .delete-button:hover svg {
-    fill: #333;
+    fill:  #888; /* Lighter red on hover */
 }
 
 /* Light mode styles for history item */
