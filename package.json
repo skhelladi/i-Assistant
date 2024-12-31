@@ -1,4 +1,9 @@
-
 {
-    "type": "module"
+    "type": "module",
+    "dependencies": {
+        "crypto-js": "^4.2.0",
+        "mongodb": "^6.12.0",
+        "sqlite": "^5.1.1",
+        "sqlite3": "^5.1.7"
+    }
 }

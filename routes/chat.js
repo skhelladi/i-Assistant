@@ -3,11 +3,15 @@ import ollama from 'ollama';
 
 const router = express.Router();
 
+// Simple stockage en mémoire : { questionId: [ { role, message }, ... ] }
+const discussions = {};
+
 // We can move the activeRequests and abortControllers here or keep them in server.mjs
 const activeRequests = new Map();
 const abortControllers = new Map();
 
-const defaultSystemContent = "You are a helpful AI assistant, always respond in the same " +
+const questionSummary = "Always summarize the question in one sentence. ";
+const defaultSystemContent = questionSummary+ "You are a helpful AI assistant, always respond in the same " +
                              "language as the user. Always add a title to your messages " +
                              "if the question is about a specific topic. Write all the "  +
                              "equations in LaTeX format.";
@@ -101,6 +105,23 @@ router.post('/stop', async (req, res) => {
     console.error('Error stopping request:', error);
     res.status(500).json({ error: error.toString() });
   }
+});
+
+// GET /discussion/:questionId
+router.get('/discussion/:questionId', (req, res) => {
+  const { questionId } = req.params;
+  const messages = discussions[questionId] || [];
+  res.json(messages);
+});
+
+// POST /discussion
+router.post('/discussion', (req, res) => {
+  const { questionId, message, role } = req.body;
+  if (!discussions[questionId]) {
+    discussions[questionId] = [];
+  }
+  discussions[questionId].push({ role, message });
+  return res.json({ success: true });
 });
 
 export default router;

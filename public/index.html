@@ -24,6 +24,9 @@
     <!-- Add marked.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
 
+    <!-- Add CryptoJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
             hljs.highlightAll();
@@ -61,55 +64,89 @@
         <symbol id="settings-icon" viewBox="0 0 24 24">
             <path d="M19.14,12.94a7.07,7.07,0,0,0,.05-1,.78.78,0,0,0-.05-.88l2.11-1.65a.5.5,0,0,0,.12-.66l-2-3.46a.5.5,0,0,0-.61-.18l-2.49,1a7.12,7.12,0,0,0-1.68-.98l-.38-2.65A.5.5,0,0,0,14.5,3H9.5a.5.5,0,0,0-.5.43L8.62,6.08a7.12,7.12,0,0,0-1.68.98l-2.49-1a.5.5,0,0,0-.61.18l-2,3.46a.5.5,0,0,0,.12.66l2.11,1.65a7.07,7.07,0,0,0-.05,1,7.07,7.07,0,0,0,.05,1L2.44,14.59a.5.5,0,0,0-.12.66l2,3.46a.5.5,0,0,0,.61.18l2.49-1a7.12,7.12,0,0,0,1.68.98l.38,2.65a.5.5,0,0,0,.5.43h5a.5.5,0,0,0,.5-.43l.38-2.65a7.12,7.12,0,0,0,1.68-.98l2.49,1a.5.5,0,0,0,.61-.18l2-3.46a.5.5,0,0,0-.12-.66ZM12,15.5A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
         </symbol>
+        <symbol id="loading-icon" viewBox="0 0 24 24">
+            <path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+        </symbol>
+        <symbol id="light-mode-icon" viewBox="0 0 24 24">
+            <path d="M12 4.5C12.83 4.5 13.5 3.83 13.5 3S12.83 1.5 12 1.5 10.5 2.17 10.5 3 11.17 4.5 12 4.5zM4.5 12C4.5 11.17 3.83 10.5 3 10.5S1.5 11.17 1.5 12 2.17 13.5 3 13.5 4.5 12.83 4.5 12zM12 19.5C12.83 19.5 13.5 18.83 13.5 18S12.83 16.5 12 16.5 10.5 17.17 10.5 18 11.17 19.5 12 19.5zM19.5 12C19.5 11.17 18.83 10.5 18 10.5S16.5 11.17 16.5 12 17.17 13.5 18 13.5 19.5 12.83 19.5 12zM12 7.5C12.83 7.5 13.5 6.83 13.5 6S12.83 4.5 12 4.5 10.5 5.17 10.5 6 11.17 7.5 12 7.5zM12 15.5C12.83 15.5 13.5 14.83 13.5 14S12.83 12.5 12 12.5 10.5 13.17 10.5 14 11.17 15.5 12 15.5zM7.5 12C7.5 11.17 6.83 10.5 6 10.5S4.5 11.17 4.5 12 5.17 13.5 6 13.5 7.5 12.83 7.5 12zM16.5 12C16.5 11.17 15.83 10.5 15 10.5S13.5 11.17 13.5 12 14.17 13.5 15 13.5 16.5 12.83 16.5 12z"/>
+        </symbol>
+        <symbol id="dark-mode-icon" viewBox="0 0 24 24">
+            <path d="M12 3C10.34 3 8.79 3.5 7.5 4.35 6.21 5.2 5.2 6.21 4.35 7.5 3.5 8.79 3 10.34 3 12s0.5 3.21 1.35 4.5c0.85 1.29 1.86 2.3 3.15 3.15C8.79 20.5 10.34 21 12 21s3.21-0.5 4.5-1.35c1.29-0.85 2.3-1.86 3.15-3.15C20.5 15.21 21 13.66 21 12s-0.5-3.21-1.35-4.5c-0.85-1.29-1.86-2.3-3.15-3.15C15.21 3.5 13.66 3 12 3zM12 19c-1.66 0-3.21-0.5-4.5-1.35-1.29-0.85-2.3-1.86-3.15-3.15C3.5 13.21 3 11.66 3 10s0.5-3.21 1.35-4.5c0.85-1.29 1.86-2.3 3.15-3.15C8.79 1.5 10.34 1 12 1s3.21 0.5 4.5 1.35c1.29 0.85 2.3 1.86 3.15 3.15C20.5 6.79 21 8.34 21 10s-0.5 3.21-1.35 4.5c-0.85 1.29-1.86 2.3-3.15 3.15C15.21 18.5 13.66 19 12 19z"/>
+        </symbol>
+        <symbol id="theme-toggle-icon" viewBox="0 0 24 24">
+            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+            <path d="M12 4a8 8 0 0 0 0 16z"/>
+        </symbol>
     </svg>
 </head>
 
 <body>
-    <div class="container">
-        <div class="header-container">
-            <div class="header-left">
-                <h1>i-@ssistant</h1>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>History</h2>
             </div>
-            <div class="header-right">
-                <div class="model-selector">
-                    <label for="model-select">Model:</label>
-                    <select id="model-select"></select>
-                </div>
-                <!-- About Button -->
-                <button type="button" class="action-button about" id="about-button" title="About">
-                    <svg>
-                        <use href="#about-icon" />
-                    </svg>
-                </button>
-                <!-- Add Settings Button -->
-                <button type="button" class="action-button settings" id="settings-button" title="Settings">
-                    <svg>
-                        <use href="#settings-icon" />
-                    </svg>
-                </button>
+            <div class="history-list" id="history-list">
+                <!-- History items will be added here dynamically -->
             </div>
         </div>
-        <div class="chat-container" id="reponse"></div>
-        <div class="input-container">
-            <form class="input-group">
-                <input type="text" id="chat" placeholder="Your message...">
-            </form>
-            <div class="input-actions">
-                <button type="submit" class="action-button send" id="send-button" title="Send">
-                    <svg>
-                        <use href="#send-icon" />
-                    </svg>
-                </button>
-                <button type="button" class="action-button stop" id="stop-button" title="Stop" disabled>
-                    <svg>
-                        <use href="#stop-icon" />
-                    </svg>
-                </button>
-                <button type="button" class="action-button retry" id="retry-button" title="Retry" disabled>
-                    <svg>
-                        <use href="#retry-icon" />
-                    </svg>
-                </button>
+        <div class="container">
+            <div class="header-container">
+                <div class="header-left">
+                    <h1>i-@ssistant</h1>
+                </div>
+                <div class="header-right">
+                    <div class="model-selector">
+                        <label for="model-select">Model:</label>
+                        <select id="model-select"></select>
+                    </div>
+                    <!-- About Button -->
+                    <button type="button" class="action-button about" id="about-button" title="About">
+                        <svg>
+                            <use href="#about-icon" />
+                        </svg>
+                    </button>
+                    <!-- Add Settings Button -->
+                    <button type="button" class="action-button settings" id="settings-button" title="Settings">
+                        <svg>
+                            <use href="#settings-icon" />
+                        </svg>
+                    </button>
+                    <!-- Add Theme Toggle Button -->
+                    <button type="button" class="action-button theme-toggle" id="theme-toggle-button" title="Toggle Theme">
+                        <svg>
+                            <use href="#theme-toggle-icon" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="chat-container" id="reponse"></div>
+            <div class="input-container">
+                <form class="input-group">
+                    <div class="input-wrapper">
+                        <div id="loading-indicator" class="loading-indicator" style="display: none;">
+                            <svg><use href="#loading-icon"/></svg>
+                        </div>
+                        <input type="text" id="chat" placeholder="   Your message...">
+                    </div>
+                </form>
+                <div class="input-actions">
+                    <button type="submit" class="action-button send" id="send-button" title="Send">
+                        <svg>
+                            <use href="#send-icon" />
+                        </svg>
+                    </button>
+                    <button type="button" class="action-button stop" id="stop-button" title="Stop" disabled>
+                        <svg>
+                            <use href="#stop-icon" />
+                        </svg>
+                    </button>
+                    <button type="button" class="action-button retry" id="retry-button" title="Retry" disabled>
+                        <svg>
+                            <use href="#retry-icon" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

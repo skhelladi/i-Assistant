@@ -7,14 +7,17 @@ const input = document.querySelector('#chat');
 const resultat = document.querySelector('#reponse');
 const modelSelect = document.querySelector('#model-select');
 
+// Add history list element reference
+const historyList = document.querySelector('#history-list');
+
 let currentController = null;
 let lastUserMessage = null;
 let currentRequestId = null;
 let messageHistory = [];
 let responseCount = 0;
 
-
-const defaultSystemContent = "You are a helpful AI assistant, always respond in the same "+
+const questionSummary = "Always summarize the question in one sentence. ";
+const defaultSystemContent = questionSummary+"You are a helpful AI assistant, always respond in the same "+
                              "language as the user. Always add a title to your messages "+ 
                              "if the question is about a specific topic. Write all the "+  
                              "equations in LaTeX format.";
@@ -92,16 +95,108 @@ async function stopRequest() {
     }
 }
 
+function showLoadingIndicator() {
+    document.getElementById('loading-indicator').style.display = 'block';
+    input.disabled = true; // Disable input field
+}
+
+function hideLoadingIndicator() {
+    document.getElementById('loading-indicator').style.display = 'none';
+    input.disabled = false; // Enable input field
+}
+
+// Function to summarize question (basic implementation)
+function summarizeQuestion(question) {
+    // Take first 30 characters and add ellipsis if longer
+    return question.length > 30 ? question.substring(0, 30) + '...' : question;
+}
+
+// Load history from server
+async function loadHistory() {
+    try {
+        const response = await fetch('/history');
+        if (!response.ok) throw new Error('Error loading history');
+        const history = await response.json();
+        history.reverse().forEach(question => addToHistory(question.question, question.id));
+    } catch (error) {
+        console.error('Error loading history:', error);
+    }
+}
+
+// Function to add question to history
+async function addToHistory(question, id) {
+    // Check if the question already exists in the history list
+    if (document.querySelector(`.history-item[data-id="${id}"]`)) {
+        return;
+    }
+
+    const historyItem = document.createElement('div');
+    historyItem.className = 'history-item';
+    historyItem.textContent = summarizeQuestion(question);
+    historyItem.title = question; // Full question as tooltip
+    historyItem.dataset.id = id; // Store the question ID
+    
+    // Click handler to load the discussion
+    historyItem.addEventListener('click', async () => {
+        await loadDiscussion(id);
+    });
+    
+    // Insert at the top of the list
+    historyList.insertBefore(historyItem, historyList.firstChild);
+
+    // Save to server if ID is not provided (new question)
+    if (!id) {
+        try {
+            const response = await fetch('/history', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question })
+            });
+            const result = await response.json();
+            if (result.success) {
+                historyItem.dataset.id = result.id;
+            }
+        } catch (error) {
+            console.error('Error saving history:', error);
+        }
+    }
+}
+
+// Load discussion for a question
+async function loadDiscussion(questionId) {
+    resultat.innerHTML = '';
+    messageHistory = []; // Réinitialiser localement
+    try {
+        const response = await fetch(`/discussion/${questionId}`);
+        if (!response.ok) throw new Error('Error loading discussion');
+        const messages = await response.json();
+
+        // Afficher chaque message
+        messages.forEach(msg => {
+            const decrypted = crypto.AES.decrypt(msg.message, 'secret-key').toString(crypto.enc.Utf8);
+            messageHistory.push({ role: msg.role, content: decrypted });
+            displayMessage({ role: msg.role, content: decrypted });
+        });
+    } catch (error) {
+        console.error('Error loading discussion:', error);
+    }
+}
+
+// Load history on startup
+loadHistory();
+
 // Send message function
 async function sendMessage(e) {
     e.preventDefault();
-    // Disable send button, enable stop, disable retry
     sendButton.disabled = true;
     stopButton.disabled = false;  // Enable the stop button
     retryButton.disabled = true;
 
     const content = input.value.trim();
     if (!content) return;
+
+    // Add to history before sending
+    addToHistory(content);
 
     responseCount = 0;
     lastUserMessage = content;
@@ -112,13 +207,13 @@ async function sendMessage(e) {
     currentController = new AbortController();
 
     try {
+        showLoadingIndicator();
         const userMessage = { role: 'user', content };
         messageHistory.push(userMessage);
         displayMessage(userMessage);
         input.value = '';
 
         const assistantMessage = { role: 'assistant', content: '' };
-        const messageElement = displayMessage(assistantMessage);
 
         const response = await fetch('/chat', {
             method: 'POST',
@@ -141,6 +236,8 @@ async function sendMessage(e) {
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
+
+        const messageElement = displayMessage(assistantMessage);
 
         while (true) {
             const { done, value } = await reader.read();
@@ -167,6 +264,9 @@ async function sendMessage(e) {
                         chatContainer.scrollTop = chatContainer.scrollHeight;
 
                         hljs.highlightAll();
+
+                        // Hide loading indicator when response starts arriving
+                        hideLoadingIndicator();
                     } catch (e) {
                         console.error('Error parsing JSON:', e, line);
                     }
@@ -176,6 +276,7 @@ async function sendMessage(e) {
 
         if (assistantMessage.content) {
             messageHistory.push(assistantMessage);
+            await saveMessageToDiscussion(lastUserMessage, assistantMessage.content);
         }
     } catch (error) {
         if (error.name === 'AbortError') {
@@ -185,10 +286,25 @@ async function sendMessage(e) {
             resultat.innerHTML += `<div class="message error-message">Error: ${error.message}</div>`;
         }
     } finally {
+        hideLoadingIndicator();
         currentRequestId = null;
         sendButton.disabled = false;
         stopButton.disabled = true;
         retryButton.disabled = false;
+    }
+}
+
+// Save message to discussion
+async function saveMessageToDiscussion(question, message) {
+    try {
+        const questionId = document.querySelector('.history-item').dataset.id;
+        await fetch('/discussion', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questionId, message, role: 'assistant' })
+        });
+    } catch (error) {
+        console.error('Error saving message to discussion:', error);
     }
 }
 
@@ -346,6 +462,7 @@ resetSettingsButton.addEventListener('click', () => {
 retryButton.addEventListener('click', async () => {
     if (lastUserMessage) {
         try {
+            showLoadingIndicator();
             const assistantMessage = { role: 'assistant', content: '' };
             const messageElement = displayMessage(assistantMessage, true);
 
@@ -397,6 +514,9 @@ retryButton.addEventListener('click', async () => {
                             chatContainer.scrollTop = chatContainer.scrollHeight;
 
                             hljs.highlightAll();
+
+                            // Hide loading indicator when response starts arriving
+                            hideLoadingIndicator();
                         } catch (e) {
                             console.error('Error parsing JSON:', e, line);
                         }
@@ -413,6 +533,7 @@ retryButton.addEventListener('click', async () => {
             console.error('Error during retry:', error);
             resultat.innerHTML += `<div class="message error-message">Error: ${error.message}</div>`;
         } finally {
+            hideLoadingIndicator();
             currentRequestId = null;
             sendButton.disabled = false;
             stopButton.disabled = true;
@@ -420,3 +541,17 @@ retryButton.addEventListener('click', async () => {
         }
     }
 });
+
+const themeToggleButton = document.getElementById('theme-toggle-button');
+
+themeToggleButton.addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    const isLightMode = document.body.classList.contains('light-mode');
+    localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+});
+
+// Load theme from localStorage
+const savedTheme = localStorage.getItem('theme') || 'dark';
+if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+}
