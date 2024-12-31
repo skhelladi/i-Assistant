@@ -349,6 +349,11 @@ form {
     cursor: not-allowed;
 }
 
+.action-button.new-session:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* About Button Styles */
 .action-button.about {
     background: #6b7280; /* Gray background */
@@ -931,6 +936,9 @@ body.light-mode #settings-form .pagination-button[type="button"]:hover {
 }
 
 .sidebar-header {
+    display: flex;
+    justify-content: space-between; /* Aligne les éléments sur les extrémités */
+    align-items: center;            /* Centre verticalement les éléments */
     padding: 1rem;
     background: #222;
     border-bottom: 1px solid #333;

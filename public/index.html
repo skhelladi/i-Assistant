@@ -80,6 +80,9 @@
         <symbol id="trash-icon" viewBox="0 0 24 24">
             <path d="M3 6h18v2H3V6zm2 3h14v13H5V9zm3 2v9h2v-9H8zm4 0v9h2v-9h-2zm4 0v9h2v-9h-2z"/>
         </symbol>
+        <symbol id="new-session-icon" viewBox="0 0 24 24">
+            <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+        </symbol>
     </svg>
 </head>
 
@@ -88,6 +91,12 @@
         <div class="sidebar">
             <div class="sidebar-header">
                 <h2>History</h2>
+                <!-- Update new session button with a new icon -->
+                <button type="button" class="action-button new-session" id="new-session-button" title="New Session">
+                    <svg>
+                        <use href="#new-session-icon" />
+                    </svg>
+                </button>
             </div>
             <div class="history-list" id="history-list">
                 <!-- History items will be added here dynamically -->

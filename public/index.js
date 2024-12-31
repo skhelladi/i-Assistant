@@ -209,12 +209,22 @@ async function loadDiscussion(questionId) {
 // Load history on startup
 loadHistory();
 
+// Function to start a new session
+function startNewSession() {
+    resultat.innerHTML = '';
+    messageHistory = [];
+    input.value = '';
+}
+
 // Send message function
 async function sendMessage(e) {
     e.preventDefault();
     sendButton.disabled = true;
     stopButton.disabled = false;  // Enable the stop button
     retryButton.disabled = true;
+
+    const newSessionButton = document.getElementById('new-session-button');
+    newSessionButton.disabled = true; // Désactiver le bouton
 
     const content = input.value.trim();
     if (!content) return;
@@ -317,6 +327,7 @@ async function sendMessage(e) {
         sendButton.disabled = false;
         stopButton.disabled = true;
         retryButton.disabled = false;
+        newSessionButton.disabled = false; // Réactiver le bouton
     }
 }
 
@@ -338,6 +349,10 @@ async function saveMessageToDiscussion(question, message) {
 sendButton.addEventListener('click', sendMessage);
 stopButton.addEventListener('click', stopRequest);
 form.addEventListener('submit', sendMessage);
+
+// Add event listener for new session button
+const newSessionButton = document.getElementById('new-session-button');
+newSessionButton.addEventListener('click', startNewSession);
 
 // Function to display a message
 function displayMessage(message) {
