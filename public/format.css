@@ -369,6 +369,34 @@ form {
     background: #4b5563; /* Darker gray on hover */
 }
 
+/* Delete button styles */
+.delete-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 1rem;
+    padding: 0;
+}
+
+.delete-button svg {
+    width: 16px;
+    height: 16px;
+    fill: #dc2626; /* Red */
+}
+
+.delete-button:hover svg {
+    fill: #ef4444; /* Lighter red on hover */
+}
+
+/* Light mode styles for delete button */
+body.light-mode .delete-button svg {
+    fill: #ef4444;
+}
+
+body.light-mode .delete-button:hover svg {
+    fill: #dc2626;
+}
+
 /* Messages */
 .message {
     position: relative;
@@ -596,10 +624,12 @@ code {
 
 .retry-page h2 {
     margin-top: 0;
+    color: #fff;
 }
 
 .retry-page p {
     margin: 0.5rem 0;
+    color: #ccc;
 }
 
 #close-about {
@@ -655,6 +685,7 @@ code {
 .form-group label {
     margin-bottom: 0.5rem;
     font-weight: bold;
+    color: #fff;
 }
 
 .form-group input,
@@ -686,6 +717,58 @@ code {
     justify-content: center;
     gap: 1rem;
     margin-top: 1rem;
+}
+
+/* Light mode styles for About and Settings Modal */
+body.light-mode .retry-page {
+    background: #ffffff;
+    color: #0d47a1;
+}
+
+body.light-mode .retry-page h2 {
+    color: #0d47a1;
+}
+
+body.light-mode .retry-page p {
+    color: #333;
+}
+
+body.light-mode #close-about {
+    background: #2563eb;
+    color: #fff;
+}
+
+body.light-mode #close-about:hover {
+    background: #1d4ed8;
+}
+
+body.light-mode #settings-form .form-group label {
+    color: #0d47a1;
+}
+
+body.light-mode #settings-form .form-group input,
+body.light-mode #settings-form .form-group select,
+body.light-mode #settings-form .form-group textarea {
+    background: #ffffff;
+    color: #0d47a1;
+    border: 1px solid #90caf9;
+}
+
+body.light-mode #settings-form .pagination-button {
+    background: #2563eb;
+    color: #fff;
+}
+
+body.light-mode #settings-form .pagination-button:hover {
+    background: #1d4ed8;
+}
+
+body.light-mode #settings-form .pagination-button[type="button"] {
+    background: #bbb;
+}
+
+body.light-mode #settings-form .pagination-button[type="button"]:hover {
+    background: #aaa;
 }
 
 /* Conteneur pour les réponses multi-page */
@@ -866,6 +949,9 @@ code {
 }
 
 .history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 0.75rem;
     margin-bottom: 0.5rem;
     background: #333;
@@ -881,6 +967,48 @@ code {
 }
 
 .history-item.active {
+    background: #2563eb;
+    color: #fff;
+}
+
+/* Delete button styles */
+.delete-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.delete-button svg {
+    width: 16px;
+    height: 16px;
+    fill: #888; /* Gray */
+}
+
+.delete-button:hover svg {
+    fill: #bbb; /* Lighter gray on hover */
+}
+
+/* Light mode styles for delete button */
+body.light-mode .delete-button svg {
+    fill: #666;
+}
+
+body.light-mode .delete-button:hover svg {
+    fill: #333;
+}
+
+/* Light mode styles for history item */
+body.light-mode .history-item {
+    background: #e3f2fd;
+    color: #0d47a1;
+}
+
+body.light-mode .history-item:hover {
+    background: #bbdefb;
+}
+
+body.light-mode .history-item.active {
     background: #2563eb;
     color: #fff;
 }

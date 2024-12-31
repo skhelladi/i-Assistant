@@ -12,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express(); // Express instance
-const port = 3333; // Listening port
+const port = process.env.PORT || 3333; // Listening port
 
 app.use(express.json());
 
@@ -28,7 +28,7 @@ app.use('/', chatRouter);
 
 // Database setup
 const dbPromise = open({
-  filename: path.join(__dirname, 'database.sqlite'),
+  filename: path.join(__dirname, '.database.sqlite'),
   driver: sqlite3.Database
 });
 
@@ -74,6 +74,20 @@ app.post('/history', async (req, res) => {
     res.json({ success: true });
   } else {
     res.status(400).json({ error: 'Invalid question' });
+  }
+});
+
+// Endpoint to delete a question from history
+app.delete('/history/:id', async (req, res) => {
+  const db = await dbPromise;
+  const id = req.params.id;
+  try {
+    await db.run('DELETE FROM questions WHERE id = ?', id);
+    await db.run('DELETE FROM discussions WHERE question_id = ?', id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting history item:', error);
+    res.status(500).json({ error: error.toString() });
   }
 });
 

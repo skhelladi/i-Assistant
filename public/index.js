@@ -111,31 +111,27 @@ function summarizeQuestion(question) {
     return question.length > 30 ? question.substring(0, 30) + '...' : question;
 }
 
-// Load history from server
-async function loadHistory() {
-    try {
-        const response = await fetch('/history');
-        if (!response.ok) throw new Error('Error loading history');
-        const history = await response.json();
-        history.reverse().forEach(question => addToHistory(question.question, question.id));
-    } catch (error) {
-        console.error('Error loading history:', error);
-    }
-}
-
-// Function to add question to history
-async function addToHistory(question, id) {
-    // Check if the question already exists in the history list
-    if (document.querySelector(`.history-item[data-id="${id}"]`)) {
-        return;
-    }
-
+// Function to add summary to history
+async function addSummaryToHistory(summary, id) {
     const historyItem = document.createElement('div');
     historyItem.className = 'history-item';
-    historyItem.textContent = summarizeQuestion(question);
-    historyItem.title = question; // Full question as tooltip
+    historyItem.textContent = summarizeQuestion(summary);
+    historyItem.title = summary; // Full summary as tooltip
     historyItem.dataset.id = id; // Store the question ID
-    
+
+    // Add delete button
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'delete-button';
+    deleteButton.innerHTML = '<svg><use href="#trash-icon"/></svg>';
+    deleteButton.onclick = async (e) => {
+        e.stopPropagation(); // Prevent triggering the click event on the history item
+        if (confirm('Are you sure you want to delete this question?')) {
+            await deleteHistoryItem(id);
+            historyItem.remove();
+        }
+    };
+    historyItem.appendChild(deleteButton);
+
     // Click handler to load the discussion
     historyItem.addEventListener('click', async () => {
         await loadDiscussion(id);
@@ -144,13 +140,13 @@ async function addToHistory(question, id) {
     // Insert at the top of the list
     historyList.insertBefore(historyItem, historyList.firstChild);
 
-    // Save to server if ID is not provided (new question)
+    // Save to server if ID is not provided (new summary)
     if (!id) {
         try {
             const response = await fetch('/history', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question })
+                body: JSON.stringify({ question: summary })
             });
             const result = await response.json();
             if (result.success) {
@@ -159,6 +155,31 @@ async function addToHistory(question, id) {
         } catch (error) {
             console.error('Error saving history:', error);
         }
+    }
+}
+
+// Function to delete a history item
+async function deleteHistoryItem(id) {
+    try {
+        const response = await fetch(`/history/${id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        if (!response.ok) throw new Error('Error deleting history item');
+    } catch (error) {
+        console.error('Error deleting history item:', error);
+    }
+}
+
+// Load history from server
+async function loadHistory() {
+    try {
+        const response = await fetch('/history');
+        if (!response.ok) throw new Error('Error loading history');
+        const history = await response.json();
+        history.reverse().forEach(question => addSummaryToHistory(question.question, question.id));
+    } catch (error) {
+        console.error('Error loading history:', error);
     }
 }
 
@@ -194,9 +215,6 @@ async function sendMessage(e) {
 
     const content = input.value.trim();
     if (!content) return;
-
-    // Add to history before sending
-    addToHistory(content);
 
     responseCount = 0;
     lastUserMessage = content;
@@ -277,6 +295,9 @@ async function sendMessage(e) {
         if (assistantMessage.content) {
             messageHistory.push(assistantMessage);
             await saveMessageToDiscussion(lastUserMessage, assistantMessage.content);
+
+            // Update the history with the question as summary
+            addSummaryToHistory(lastUserMessage);
         }
     } catch (error) {
         if (error.name === 'AbortError') {
