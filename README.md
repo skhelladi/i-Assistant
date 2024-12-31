@@ -13,6 +13,8 @@ i-@ssistant serves as a graphical interface for [Ollama](https://ollama.com/) us
 - Settings for customization
 - Copy and paste functionality
 - Save answers to a text/markdown file
+- Save chat history (in progress)
+- Dark/light mode
 
 ## Installation
 
@@ -31,10 +33,10 @@ cd i-assistant
 ### Install Dependencies
 
 ```bash
-npm install
 npm install express
 npm install sqlite3
 npm install ollama
+npm install crypto-js
 ```
 
 ### Install Ollama and its Modules
