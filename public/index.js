@@ -111,6 +111,9 @@ function summarizeQuestion(question) {
     return question.length > 30 ? question.substring(0, 30) + '...' : question;
 }
 
+// Set to track added questions
+const addedQuestions = new Set();
+
 // Function to add summary to history
 async function addSummaryToHistory(summary, id) {
     const historyItem = document.createElement('div');
@@ -231,6 +234,11 @@ async function sendMessage(e) {
         displayMessage(userMessage);
         input.value = '';
 
+        // Add the first question to history
+        if (messageHistory.length === 1) {
+            addSummaryToHistory(lastUserMessage);
+        }
+
         const assistantMessage = { role: 'assistant', content: '' };
 
         const response = await fetch('/chat', {
@@ -295,9 +303,6 @@ async function sendMessage(e) {
         if (assistantMessage.content) {
             messageHistory.push(assistantMessage);
             await saveMessageToDiscussion(lastUserMessage, assistantMessage.content);
-
-            // Update the history with the question as summary
-            addSummaryToHistory(lastUserMessage);
         }
     } catch (error) {
         if (error.name === 'AbortError') {
