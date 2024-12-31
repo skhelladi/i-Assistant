@@ -247,7 +247,7 @@ async function sendMessage(e) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                messages: [userMessage],
+                messages: messageHistory,
                 model: currentModel,
                 stream: currentSettings.stream,
                 options: {
