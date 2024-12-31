@@ -32,6 +32,8 @@ cd i-assistant
 
 ```bash
 npm install
+npm install express
+npm install ollama
 ```
 
 ### Install Ollama and its Modules
