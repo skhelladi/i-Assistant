@@ -4,7 +4,7 @@ import modelsRouter from './routes/models.js';
 import chatRouter from './routes/chat.js';
 
 const app = express(); // Express instance
-const port = 3000; // Listening port
+const port = 3333; // Listening port
 
 app.use(express.json());
 
