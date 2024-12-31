@@ -33,7 +33,7 @@ cd i-assistant
 ```bash
 npm install
 npm install express
-npm install sqlite3 crypto-js
+npm install sqlite3
 npm install ollama
 ```
 
