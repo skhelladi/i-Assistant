@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import modelsRouter from './routes/models.js';
 import chatRouter from './routes/chat.js';
+import { cacheMiddleware, invalidateCache } from './cache.js';
 
 // Define __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -23,96 +24,165 @@ app.use(express.static('public'));
 app.use('/models', modelsRouter);
 app.use('/chat', chatRouter);
 
-// Utiliser le router pour la discussion
-app.use('/', chatRouter);
-
 // Database setup
-const dbPromise = open({
-  filename: path.join(__dirname, '.database.sqlite'),
-  driver: sqlite3.Database
-});
+let db = null;
 
 async function initializeDatabase() {
-  const db = await dbPromise;
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS questions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      question TEXT NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    CREATE TABLE IF NOT EXISTS discussions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      question_id INTEGER NOT NULL,
-      message TEXT NOT NULL,
-      role TEXT NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (question_id) REFERENCES questions(id)
-    );
-  `);
+    try {
+        db = await open({
+            filename: path.join(__dirname, '.database.sqlite'),
+            driver: sqlite3.Database
+        });
+
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS questions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                question TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS discussions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                question_id INTEGER NOT NULL,
+                message TEXT NOT NULL,
+                role TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (question_id) REFERENCES questions(id)
+            );
+        `);
+
+        console.log('Database initialized successfully');
+    } catch (error) {
+        console.error('Error initializing database:', error);
+        process.exit(1);
+    }
 }
 
-initializeDatabase();
+// Initialiser la base de données avant de démarrer le serveur
+await initializeDatabase();
 
 // Endpoint to get history
 app.get('/history', async (req, res) => {
-  const db = await dbPromise;
-  const questions = await db.all('SELECT * FROM questions ORDER BY created_at DESC');
-  const decryptedQuestions = questions.map(q => ({
-    ...q,
-    question: crypto.AES.decrypt(q.question, 'secret-key').toString(crypto.enc.Utf8)
-  }));
-  res.json(decryptedQuestions);
+    try {
+        console.log('Fetching history...');
+        const questions = await db.all('SELECT * FROM questions ORDER BY created_at DESC');
+        console.log('Found questions:', questions);
+        const decryptedQuestions = questions.map(q => ({
+            ...q,
+            question: crypto.AES.decrypt(q.question, 'secret-key').toString(crypto.enc.Utf8)
+        }));
+        console.log('Decrypted questions:', decryptedQuestions);
+        res.json(decryptedQuestions);
+    } catch (error) {
+        console.error('Error getting history:', error);
+        res.status(500).json({ error: error.toString() });
+    }
 });
 
 // Endpoint to add a question to history
 app.post('/history', async (req, res) => {
-  const db = await dbPromise;
-  const question = req.body.question;
-  if (question) {
-    const encryptedQuestion = crypto.AES.encrypt(question, 'secret-key').toString();
-    await db.run('INSERT INTO questions (question) VALUES (?)', encryptedQuestion);
-    res.json({ success: true });
-  } else {
-    res.status(400).json({ error: 'Invalid question' });
-  }
+    const question = req.body.question;
+    if (question) {
+        const encryptedQuestion = crypto.AES.encrypt(question, 'secret-key').toString();
+        const result = await db.run('INSERT INTO questions (question) VALUES (?)', encryptedQuestion);
+        res.json({ success: true, id: result.lastID });
+    } else {
+        res.status(400).json({ error: 'Invalid question' });
+    }
 });
 
 // Endpoint to delete a question from history
 app.delete('/history/:id', async (req, res) => {
-  const db = await dbPromise;
-  const id = req.params.id;
-  try {
-    await db.run('DELETE FROM questions WHERE id = ?', id);
-    await db.run('DELETE FROM discussions WHERE question_id = ?', id);
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting history item:', error);
-    res.status(500).json({ error: error.toString() });
-  }
+    const id = req.params.id;
+    try {
+        await db.run('DELETE FROM questions WHERE id = ?', id);
+        await db.run('DELETE FROM discussions WHERE question_id = ?', id);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting history item:', error);
+        res.status(500).json({ error: error.toString() });
+    }
 });
 
 // Endpoint to get discussion for a question
 app.get('/discussion/:questionId', async (req, res) => {
-  const db = await dbPromise;
-  const questionId = req.params.questionId;
-  const messages = await db.all('SELECT * FROM discussions WHERE question_id = ? ORDER BY created_at', questionId);
-  res.json(messages);
+    try {
+        const questionId = req.params.questionId;
+        console.log('Fetching discussion for question:', questionId);
+        const messages = await db.all(
+            'SELECT * FROM discussions WHERE question_id = ? ORDER BY created_at',
+            questionId
+        );
+        console.log('Found messages:', messages);
+        
+        // Décrypter les messages avant de les envoyer
+        const decryptedMessages = messages.map(msg => {
+            try {
+                return {
+                    ...msg,
+                    message: crypto.AES.decrypt(msg.message, 'secret-key').toString(crypto.enc.Utf8)
+                };
+            } catch (error) {
+                console.error('Error decrypting message:', error);
+                return null;
+            }
+        }).filter(msg => msg !== null);
+        
+        console.log('Decrypted messages:', decryptedMessages);
+        res.json(decryptedMessages);
+    } catch (error) {
+        console.error('Error loading discussion:', error);
+        res.status(500).json({ error: error.toString() });
+    }
 });
 
 // Endpoint to add a message to a discussion
 app.post('/discussion', async (req, res) => {
-  const db = await dbPromise;
-  const { questionId, message, role } = req.body;
-  if (questionId && message && role) {
-    const encryptedMessage = crypto.AES.encrypt(message, 'secret-key').toString();
-    await db.run('INSERT INTO discussions (question_id, message, role) VALUES (?, ?, ?)', questionId, encryptedMessage, role);
-    res.json({ success: true });
-  } else {
-    res.status(400).json({ error: 'Invalid data' });
-  }
+    const { questionId, message, role } = req.body;
+    console.log('Received message data:', { questionId, message, role }); // Debug log
+    
+    if (questionId && message && role) {
+        try {
+            const encryptedMessage = crypto.AES.encrypt(message, 'secret-key').toString();
+            console.log('Encrypted message:', encryptedMessage); // Debug log
+            
+            await db.run(
+                'INSERT INTO discussions (question_id, message, role) VALUES (?, ?, ?)',
+                questionId, encryptedMessage, role
+            );
+            
+            // Vérifier que le message a été sauvegardé
+            const savedMessage = await db.get(
+                'SELECT * FROM discussions WHERE question_id = ? ORDER BY id DESC LIMIT 1',
+                questionId
+            );
+            console.log('Saved message:', savedMessage); // Debug log
+            
+            res.json({ success: true });
+        } catch (error) {
+            console.error('Error saving message:', error);
+            res.status(500).json({ error: error.toString() });
+        }
+    } else {
+        console.error('Invalid data received:', { questionId, message, role }); // Debug log
+        res.status(400).json({ error: 'Invalid data' });
+    }
 });
 
-// Listening on the configured port
+// Gérer la fermeture propre de la base de données
+process.on('SIGINT', async () => {
+    try {
+        if (db) {
+            await db.close();
+            console.log('Database connection closed');
+        }
+        process.exit(0);
+    } catch (error) {
+        console.error('Error closing database:', error);
+        process.exit(1);
+    }
+});
+
+// Démarrer le serveur seulement après l'initialisation de la base de données
 app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
+    console.log(`Server listening at http://localhost:${port}`);
 });

@@ -22,13 +22,11 @@ router.post('/', async (req, res) => {
   const requestId = Date.now().toString();
   const abortController = new AbortController();
   
-  const systemContent = req.body.options.system || defaultSystemContent;
-
   try {
     const messages = [
       {
         role: 'system',
-        content: systemContent
+        content: req.body.options.system || defaultSystemContent
       },
       ...req.body.messages
     ];
@@ -54,7 +52,7 @@ router.post('/', async (req, res) => {
       stream: req.body.stream,
       options: {
         temperature: req.body.options.temperature,
-        system: systemContent
+        system: req.body.options.system
       },
       signal: abortController.signal
     });
@@ -64,10 +62,8 @@ router.post('/', async (req, res) => {
         console.log('Request canceled:', requestId);
         break;
       }
-      console.log('Chunk received from Ollama:', part);
       if (part.message?.content) {
         const formattedText = part.message.content;
-        console.log('Sending to client:', formattedText);
         res.write(`data: ${JSON.stringify({content: formattedText})}\n\n`);
       }
     }
@@ -105,23 +101,6 @@ router.post('/stop', async (req, res) => {
     console.error('Error stopping request:', error);
     res.status(500).json({ error: error.toString() });
   }
-});
-
-// GET /discussion/:questionId
-router.get('/discussion/:questionId', (req, res) => {
-  const { questionId } = req.params;
-  const messages = discussions[questionId] || [];
-  res.json(messages);
-});
-
-// POST /discussion
-router.post('/discussion', (req, res) => {
-  const { questionId, message, role } = req.body;
-  if (!discussions[questionId]) {
-    discussions[questionId] = [];
-  }
-  discussions[questionId].push({ role, message });
-  return res.json({ success: true });
 });
 
 export default router;

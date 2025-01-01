@@ -3,6 +3,7 @@
     "dependencies": {
         "crypto-js": "^4.2.0",
         "sqlite": "^5.1.1",
-        "sqlite3": "^5.1.7"
+        "sqlite3": "^5.1.7",
+        "node-cache": "^5.1.2"
     }
 }

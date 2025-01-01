@@ -37,6 +37,7 @@ npm install express
 npm install sqlite3
 npm install ollama
 npm install crypto-js
+npm install node-cache
 ```
 
 ### Install Ollama and its Modules

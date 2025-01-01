@@ -119,15 +119,15 @@ async function addSummaryToHistory(summary, id) {
     const historyItem = document.createElement('div');
     historyItem.className = 'history-item';
     historyItem.textContent = summarizeQuestion(summary);
-    historyItem.title = summary; // Full summary as tooltip
-    historyItem.dataset.id = id; // Store the question ID
+    historyItem.title = summary;
+    historyItem.dataset.id = id;
 
-    // Add delete button
+    // Ajouter le bouton de suppression
     const deleteButton = document.createElement('button');
     deleteButton.className = 'delete-button';
     deleteButton.innerHTML = '<svg><use href="#trash-icon"/></svg>';
     deleteButton.onclick = async (e) => {
-        e.stopPropagation(); // Prevent triggering the click event on the history item
+        e.stopPropagation();
         if (confirm('Are you sure you want to delete this question?')) {
             await deleteHistoryItem(id);
             historyItem.remove();
@@ -135,30 +135,13 @@ async function addSummaryToHistory(summary, id) {
     };
     historyItem.appendChild(deleteButton);
 
-    // Click handler to load the discussion
-    historyItem.addEventListener('click', async () => {
-        await loadDiscussion(id);
-    });
-    
-    // Insert at the top of the list
-    historyList.insertBefore(historyItem, historyList.firstChild);
+    // Ajouter l'événement de clic pour charger la discussion
+    historyItem.addEventListener('click', () => loadDiscussion(id));
 
-    // Save to server if ID is not provided (new summary)
-    if (!id) {
-        try {
-            const response = await fetch('/history', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question: summary })
-            });
-            const result = await response.json();
-            if (result.success) {
-                historyItem.dataset.id = result.id;
-            }
-        } catch (error) {
-            console.error('Error saving history:', error);
-        }
-    }
+    // Insérer en haut de la liste
+    historyList.insertBefore(historyItem, historyList.firstChild);
+    
+    return id;
 }
 
 // Function to delete a history item
@@ -180,7 +163,37 @@ async function loadHistory() {
         const response = await fetch('/history');
         if (!response.ok) throw new Error('Error loading history');
         const history = await response.json();
-        history.reverse().forEach(question => addSummaryToHistory(question.question, question.id));
+        
+        // Vider l'historique existant
+        historyList.innerHTML = '';
+        
+        // Charger l'historique dans l'ordre chronologique inverse
+        for (const question of history.reverse()) {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.textContent = summarizeQuestion(question.question);
+            historyItem.title = question.question;
+            historyItem.dataset.id = question.id;
+
+            // Ajouter le bouton de suppression
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-button';
+            deleteButton.innerHTML = '<svg><use href="#trash-icon"/></svg>';
+            deleteButton.onclick = async (e) => {
+                e.stopPropagation();
+                if (confirm('Are you sure you want to delete this question?')) {
+                    await deleteHistoryItem(question.id);
+                    historyItem.remove();
+                }
+            };
+            historyItem.appendChild(deleteButton);
+
+            // Ajouter l'événement de clic pour charger la discussion
+            historyItem.addEventListener('click', () => loadDiscussion(question.id));
+
+            // Ajouter à l'historique
+            historyList.appendChild(historyItem);
+        }
     } catch (error) {
         console.error('Error loading history:', error);
     }
@@ -188,21 +201,64 @@ async function loadHistory() {
 
 // Load discussion for a question
 async function loadDiscussion(questionId) {
-    resultat.innerHTML = '';
-    messageHistory = []; // Réinitialiser localement
+    console.log('Loading discussion for question:', questionId);
     try {
+        // Nettoyer l'affichage actuel
+        resultat.innerHTML = '';
+        messageHistory = [];
+
+        // Mettre à jour la sélection dans l'historique
+        document.querySelectorAll('.history-item').forEach(item => {
+            item.classList.remove('active', 'selected');
+            if (item.dataset.id === questionId) {
+                item.classList.add('active', 'selected');
+            }
+        });
+
         const response = await fetch(`/discussion/${questionId}`);
-        if (!response.ok) throw new Error('Error loading discussion');
+        
+        if (!response.ok) {
+            throw new Error(`Error loading discussion: ${response.statusText}`);
+        }
+
         const messages = await response.json();
 
-        // Afficher chaque message
-        messages.forEach(msg => {
-            const decrypted = crypto.AES.decrypt(msg.message, 'secret-key').toString(crypto.enc.Utf8);
-            messageHistory.push({ role: msg.role, content: decrypted });
-            displayMessage({ role: msg.role, content: decrypted });
-        });
+        if (messages && messages.length > 0) {
+            messages.forEach(msg => {
+                const messageObj = {
+                    role: msg.role,
+                    content: msg.message
+                };
+                messageHistory.push(messageObj);
+                displayMessage(messageObj);
+            });
+
+            // Faire défiler jusqu'au dernier message
+            const chatContainer = document.querySelector('.chat-container');
+            if (chatContainer) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            // Activer/désactiver les boutons appropriés
+            sendButton.disabled = false;
+            stopButton.disabled = true;
+            retryButton.disabled = false;
+
+            // Réinitialiser le compteur de réponses
+            responseCount = 0;
+
+            // Appliquer la coloration syntaxique
+            hljs.highlightAll();
+        }
+
     } catch (error) {
         console.error('Error loading discussion:', error);
+        resultat.innerHTML = `<div class="error">Error loading discussion: ${error.message}</div>`;
+        
+        // Réactiver les boutons en cas d'erreur
+        sendButton.disabled = false;
+        stopButton.disabled = true;
+        retryButton.disabled = false;
     }
 }
 
@@ -214,20 +270,29 @@ function startNewSession() {
     resultat.innerHTML = '';
     messageHistory = [];
     input.value = '';
+    
+    // Désactiver la session active dans l'historique
+    document.querySelectorAll('.history-item').forEach(item => {
+        item.classList.remove('active', 'selected');
+    });
 }
 
 // Send message function
 async function sendMessage(e) {
     e.preventDefault();
+    
+    const content = input.value.trim();
+    if (!content) {
+        console.log('Message empty, not sending');
+        return;
+    }
+
     sendButton.disabled = true;
-    stopButton.disabled = false;  // Enable the stop button
+    stopButton.disabled = false;
     retryButton.disabled = true;
 
     const newSessionButton = document.getElementById('new-session-button');
-    newSessionButton.disabled = true; // Désactiver le bouton
-
-    const content = input.value.trim();
-    if (!content) return;
+    newSessionButton.disabled = true;
 
     responseCount = 0;
     lastUserMessage = content;
@@ -244,10 +309,32 @@ async function sendMessage(e) {
         displayMessage(userMessage);
         input.value = '';
 
-        // Add the first question to history
-        if (messageHistory.length === 1) {
-            addSummaryToHistory(lastUserMessage);
+        // Obtenir l'ID de la session active
+        let questionId = getCurrentQuestionId();
+        
+        // Créer une nouvelle entrée UNIQUEMENT si aucune session n'est active
+        // ET si c'est une nouvelle session (pas de messages dans l'historique)
+        if (!questionId && messageHistory.length === 1) {
+            const historyResponse = await fetch('/history', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: content })
+            });
+
+            if (!historyResponse.ok) {
+                throw new Error('Failed to save question to history');
+            }
+
+            const historyResult = await historyResponse.json();
+            questionId = historyResult.id;
+            
+            // Ajouter à l'historique visuel et activer la nouvelle session
+            await addSummaryToHistory(content, questionId);
+            document.querySelector(`[data-id="${questionId}"]`).classList.add('active', 'selected');
         }
+
+        // Sauvegarder le message de l'utilisateur dans la discussion courante
+        await saveMessageToDiscussion(questionId, content, 'user');
 
         const assistantMessage = { role: 'assistant', content: '' };
 
@@ -280,14 +367,11 @@ async function sendMessage(e) {
             if (done) break;
 
             const text = decoder.decode(value, { stream: true });
-            console.log('Received from server:', text); // Debug
-
             const lines = text.split('\n');
             for (const line of lines) {
                 if (line.startsWith('data: ')) {
                     try {
                         const data = JSON.parse(line.slice(6));
-                        console.log('Parsed data:', data); // Debug
                         if (data.requestId) {
                             currentRequestId = data.requestId;
                             continue;
@@ -300,8 +384,6 @@ async function sendMessage(e) {
                         chatContainer.scrollTop = chatContainer.scrollHeight;
 
                         hljs.highlightAll();
-
-                        // Hide loading indicator when response starts arriving
                         hideLoadingIndicator();
                     } catch (e) {
                         console.error('Error parsing JSON:', e, line);
@@ -312,8 +394,10 @@ async function sendMessage(e) {
 
         if (assistantMessage.content) {
             messageHistory.push(assistantMessage);
-            await saveMessageToDiscussion(lastUserMessage, assistantMessage.content);
+            // Sauvegarder la réponse de l'assistant dans la même discussion
+            await saveMessageToDiscussion(questionId, assistantMessage.content, 'assistant');
         }
+
     } catch (error) {
         if (error.name === 'AbortError') {
             console.log('Request canceled');
@@ -327,21 +411,38 @@ async function sendMessage(e) {
         sendButton.disabled = false;
         stopButton.disabled = true;
         retryButton.disabled = false;
-        newSessionButton.disabled = false; // Réactiver le bouton
+        newSessionButton.disabled = false;
     }
 }
 
 // Save message to discussion
-async function saveMessageToDiscussion(question, message) {
+async function saveMessageToDiscussion(questionId, message, role) {
+    if (!questionId || !message || !role) {
+        console.error('Missing required parameters for saving message:', { questionId, message, role });
+        return;
+    }
+    
     try {
-        const questionId = document.querySelector('.history-item').dataset.id;
-        await fetch('/discussion', {
+        console.log('Saving message:', { questionId, message, role }); // Debug log
+        const response = await fetch('/discussion', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ questionId, message, role: 'assistant' })
+            body: JSON.stringify({ questionId, message, role })
         });
+        
+        if (!response.ok) {
+            throw new Error(`Failed to save message: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        if (!result.success) {
+            throw new Error('Failed to save message to discussion');
+        }
+        
+        console.log(`Message saved successfully for question ${questionId}`);
     } catch (error) {
         console.error('Error saving message to discussion:', error);
+        throw error;
     }
 }
 
@@ -596,3 +697,15 @@ const savedTheme = localStorage.getItem('theme') || 'dark';
 if (savedTheme === 'light') {
     document.body.classList.add('light-mode');
 }
+
+// Ajouter cette fonction utilitaire
+function getCurrentQuestionId() {
+    const activeItem = document.querySelector('.history-item.active');
+    return activeItem ? activeItem.dataset.id : null;
+}
+
+// Ajouter un événement pour charger l'historique quand la page est prête
+document.addEventListener('DOMContentLoaded', () => {
+    loadHistory();
+    loadModels();
+});
