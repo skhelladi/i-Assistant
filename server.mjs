@@ -256,8 +256,7 @@ app.listen(port, () => {
     |          OllamaDesk Server           |
     ----------------------------------------
     | Ollama Version: ${ollamaVersion}              |
-    | Version: 1.0.0                       |
-    | Developer: Sofiane KHELLADI          |
+    | Version: 1.0.0b                      |
     | License: GPL-3                       |
     ----------------------------------------
     `);
