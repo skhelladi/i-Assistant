@@ -8,6 +8,7 @@ import modelsRouter from './routes/models.js';
 import chatRouter from './routes/chat.js';
 import { cacheMiddleware, invalidateCache } from './cache.js';
 import ollama from 'ollama';
+import ip from 'ip'; // Import the ip module
 
 // Define __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -208,7 +209,11 @@ app.put('/history/:id', async (req, res) => {
     });
 });
 
-// Démarrer le serveur seulement après l'initialisation de la base de données
+// Start the server only after the database is initialized
 app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
+    console.log(`Server listening at:`);
+    console.log(`\thttp://localhost:${port}`);
+    // Log the server listening at public ip address and port
+    console.log(`\thttp://${ip.address()}:${port}`);
+    console.log('Press Ctrl+C to stop the server');
 });

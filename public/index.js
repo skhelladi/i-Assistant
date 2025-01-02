@@ -9,6 +9,8 @@ const modelSelect = document.querySelector('#model-select');
 
 // Add history list element reference
 const historyList = document.querySelector('#history-list');
+const sidebar = document.querySelector('.sidebar');
+const toggleSidebarButton = document.querySelector('#toggle-sidebar-button');
 
 let currentController = null;
 let lastUserMessage = null;
@@ -824,3 +826,18 @@ document.addEventListener('DOMContentLoaded', () => {
     loadHistory();
     loadModels();
 });
+
+// Function to toggle the sidebar visibility
+function toggleSidebar() {
+    sidebar.classList.toggle('hidden');
+    if (sidebar.classList.contains('hidden')) {
+        toggleSidebarButton.innerHTML = '<svg><use href="#show-sidebar-icon"/></svg>';
+        toggleSidebarButton.classList.add('show-sidebar-button');
+    } else {
+        toggleSidebarButton.innerHTML = '<svg><use href="#hide-sidebar-icon"/></svg>';
+        toggleSidebarButton.classList.remove('show-sidebar-button');
+    }
+}
+
+// Add event listener for the toggle sidebar button
+toggleSidebarButton.addEventListener('click', toggleSidebar);

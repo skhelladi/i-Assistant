@@ -6,7 +6,7 @@ const cache = new NodeCache({
     checkperiod: 320
 });
 
-// Middleware pour la mise en cache
+// Middleware to cache responses
 export const cacheMiddleware = (duration) => {
     return (req, res, next) => {
         // Skip cache for POST/PUT/DELETE requests

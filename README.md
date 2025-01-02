@@ -39,6 +39,7 @@ npm install ollama
 npm install crypto-js
 npm install node-cache
 npm install nodemon
+npm install ip
 ```
 
 ### Install Ollama and its Modules

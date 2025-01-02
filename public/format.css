@@ -33,6 +33,7 @@ body.light-mode h1 {
     background: #e3f2fd; /* Lighter blue */
     border-bottom: 1px solid #64b5f6; /* Medium blue */
     color: #333; /* Dark gray */
+    font-size: 1.5rem; /* Reduce the title size */
 }
 
 body.light-mode select {
@@ -126,9 +127,11 @@ body {
 }
 
 h1 {
-    background: #1a1a1a; /* Very dark gray */
-    border-bottom: 1px solid #444; /* Medium gray */
-    color: #fff; /* White */
+    padding: 1rem 2rem;
+    margin: 0;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    font-size: 1.5rem; /* Reduce the title size */
 }
 
 select {
@@ -274,6 +277,11 @@ body.light-mode .save-button svg {
     max-width: 1400px;
     margin: 0 auto;
     width: 100%;
+    transition: max-width 0.3s ease;
+}
+
+.sidebar.hidden + .container {
+    max-width: 100%;
 }
 
 /* Header styles */
@@ -304,6 +312,7 @@ h1 {
     margin: 0;
     background: #1a1a1a;
     border-bottom: 1px solid #333;
+    font-size: 1.5rem; /* Reduce the title size */
 }
 
 /* Model selector */
@@ -687,7 +696,7 @@ body.light-mode .edit-history-button:hover svg {
     line-height: 1.6;
     white-space: pre-wrap;
     font-family: monospace;
-    font-size: 1.1rem;
+    font-size: 1.0rem;
     max-width: 100%;
     margin: 2rem 0;
 }
@@ -1102,6 +1111,12 @@ body.light-mode #settings-form .pagination-button[type="button"]:hover {
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    transition: width 0.3s ease;
+}
+
+.sidebar.hidden {
+    width: 0;
+    overflow: hidden;
 }
 
 .sidebar-header {
@@ -1125,50 +1140,33 @@ body.light-mode #settings-form .pagination-button[type="button"]:hover {
     padding: 1rem;
 }
 
-.history-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem;
-    margin-bottom: 0.5rem;
-    background: #333;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: #fff;
-    transition: background-color 0.2s;
-}
-
-.history-item:hover {
-    background: #444;
-}
-
-.history-item.active {
-    background: #2563eb;
-    color: #fff;
-}
-
-.history-item .edit-history-button,
-.history-item .delete-button {
-    margin-left: 0.5rem;
-}
-
-/* Delete button styles */
-.delete-button {
+/* Toggle sidebar button styles */
+#toggle-sidebar-button {
     background: none;
     border: none;
     cursor: pointer;
     padding: 0;
+    margin-left: 1rem;
 }
 
-.delete-button svg {
-    width: 16px;
-    height: 16px;
-    fill: #888; /* Gray */
+#toggle-sidebar-button svg {
+    width: 20px;
+    height: 20px;
+    fill: #fff;
 }
 
-.delete-button:hover svg {
-    fill: #bbb; /* Lighter gray on hover */
+/* Ensure the toggle button remains visible when the sidebar is hidden */
+.show-sidebar-button {
+    position: fixed;
+    top: 1rem;
+    left: 0; /* Completely to the left */
+    z-index: 1000;
+    padding-left: 1rem; /* Add padding to avoid overlap with the edge */
+}
+
+/* Light mode styles for toggle sidebar button */
+body.light-mode #toggle-sidebar-button svg {
+    fill: #0d47a1;
 }
 
 /* Light mode styles for delete button */
