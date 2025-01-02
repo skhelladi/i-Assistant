@@ -212,21 +212,65 @@ async function loadHistory() {
         if (!response.ok) throw new Error('Error loading history');
         const history = await response.json();
         
-        // Vider l'historique existant
+        // Clear existing history
         historyList.innerHTML = '';
         
-        // Charger l'historique dans l'ordre chronologique inverse
+        // Load history in reverse chronological order
         for (const question of history.reverse()) {
             const historyItem = document.createElement('div');
             historyItem.className = 'history-item';
-            historyItem.textContent = summarizeQuestion(question.question);
-            historyItem.title = question.question;
             historyItem.dataset.id = question.id;
 
-            // Ajouter le bouton de suppression
+            // Add title span
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'history-title';
+            titleSpan.textContent = summarizeQuestion(question.question);
+            historyItem.appendChild(titleSpan);
+
+            // Create buttons container
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.className = 'history-buttons';
+
+            // Add edit button
+            const editButton = document.createElement('button');
+            editButton.className = 'edit-history-button';
+            editButton.innerHTML = '<svg><use href="#edit-icon"/></svg>';
+            editButton.title = 'Edit title';
+            editButton.onclick = async (e) => {
+                e.stopPropagation();
+                const newTitle = prompt('Enter new title:', question.question);
+                if (newTitle && newTitle !== question.question) {
+                    try {
+                        const response = await fetch(`/history/${question.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ newTitle })
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to update title');
+                        }
+                        
+                        // Update the title in the UI
+                        titleSpan.textContent = summarizeQuestion(newTitle);
+                        
+                        // Update the title in the history item's data
+                        historyItem.dataset.title = newTitle;
+                        
+                        console.log('Title updated successfully');
+                    } catch (error) {
+                        console.error('Error updating title:', error);
+                        alert('Failed to update title. Please try again.');
+                    }
+                }
+            };
+            buttonsContainer.appendChild(editButton);
+
+            // Add delete button
             const deleteButton = document.createElement('button');
             deleteButton.className = 'delete-button';
             deleteButton.innerHTML = '<svg><use href="#trash-icon"/></svg>';
+            deleteButton.title = 'Delete';
             deleteButton.onclick = async (e) => {
                 e.stopPropagation();
                 if (confirm('Are you sure you want to delete this question?')) {
@@ -234,12 +278,15 @@ async function loadHistory() {
                     historyItem.remove();
                 }
             };
-            historyItem.appendChild(deleteButton);
+            buttonsContainer.appendChild(deleteButton);
 
-            // Ajouter l'événement de clic pour charger la discussion
+            // Add buttons container to history item
+            historyItem.appendChild(buttonsContainer);
+
+            // Add click event to load discussion
             historyItem.addEventListener('click', () => loadDiscussion(question.id));
 
-            // Ajouter à l'historique
+            // Add to history list
             historyList.appendChild(historyItem);
         }
     } catch (error) {

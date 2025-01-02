@@ -263,6 +263,7 @@ body.light-mode .edit-button svg,
 body.light-mode .save-button svg {
     fill: #0d47a1; /* Dark blue for better visibility */
 }
+
 /* Layout containers */
 .container {
     flex: 1;
@@ -1300,4 +1301,3 @@ body.light-mode .history-item.active {
         max-width: 100%;
     }
 }
-

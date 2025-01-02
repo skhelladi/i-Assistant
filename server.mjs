@@ -20,7 +20,6 @@ app.use(express.json());
 
 // We serve the public folder statically, which contains our index.html
 app.use(express.static('public'));
-app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 
 // Use the modular routers
 app.use('/models', modelsRouter);
@@ -180,6 +179,7 @@ app.put('/history/:id', async (req, res) => {
     }
 
     try {
+        // Encrypt the new title before saving
         const encryptedTitle = crypto.AES.encrypt(newTitle, 'secret-key').toString();
         await db.run('UPDATE questions SET question = ? WHERE id = ?', [encryptedTitle, id]);
         res.json({ success: true });
@@ -187,17 +187,6 @@ app.put('/history/:id', async (req, res) => {
         console.error('Error updating question title:', error);
         res.status(500).json({ error: error.toString() });
     }
-});
-
-// Add favicon handling
-app.get('/favicon.ico', (req, res) => {
-    const faviconPath = path.join(__dirname, 'public/assets/favicon.ico');
-    res.sendFile(faviconPath, (err) => {
-        if (err) {
-            console.error('Error serving favicon:', err);
-            res.status(404).end();
-        }
-    });
 });
 
 // Clean shutdown handler
