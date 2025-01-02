@@ -197,7 +197,9 @@
             <h2>Settings</h2>
             <form id="settings-form">
                 <div class="form-group">
-                    <label for="stream">Stream:</label>
+                    <label for="stream">Stream:
+                        <span class="help-icon" title="Enable or disable streaming responses.">?</span>
+                    </label>
                     <select id="stream" name="stream">
                         <option value="true">True</option>
                         <option value="false">False</option>
@@ -205,19 +207,25 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="temperature">Temperature:</label>
+                    <label for="temperature">Temperature:
+                        <span class="help-icon" title="Controls the randomness of the response. Range: 0.0 (deterministic) to 1.0 (highly random)">?</span>
+                    </label>
                     <input type="number" id="temperature" name="temperature" min="0" max="1" step="0.1" value="0.7">
                 </div>
 
                 <!-- Change label from "System Content" to "Context" -->
                 <div class="form-group">
-                    <label for="systemContent">Context:</label>
+                    <label for="systemContent">Context:
+                        <span class="help-icon" title="The context or system message for the AI assistant.">?</span>
+                    </label>
                     <textarea id="systemContent" name="systemContent" rows="4">You are a helpful AI assistant, always respond in the same language as the user. Always add a title to your messages if the question is about a specific topic. Write all the equations in LaTeX format.</textarea>
                 </div>
 
                 <!-- Add input field for port number -->
                 <div class="form-group">
-                    <label for="port">Port:</label>
+                    <label for="port">Port:
+                        <span class="help-icon" title="The port number for the server. Range: 1 to 65535">?</span>
+                    </label>
                     <input type="number" id="port" name="port" min="1" max="65535" value="3333">
                 </div>
 

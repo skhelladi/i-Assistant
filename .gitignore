@@ -2758,3 +2758,15 @@ node_modules/whatwg-fetch/dist/fetch.umd.js.flow
 node_modules/ip/package.json
 node_modules/ip/README.md
 node_modules/ip/lib/ip.js
+node_modules/chalk/license
+node_modules/chalk/package.json
+node_modules/chalk/readme.md
+node_modules/chalk/source/index.d.ts
+node_modules/chalk/source/index.js
+node_modules/chalk/source/utilities.js
+node_modules/chalk/source/vendor/ansi-styles/index.d.ts
+node_modules/chalk/source/vendor/ansi-styles/index.js
+node_modules/chalk/source/vendor/supports-color/browser.d.ts
+node_modules/chalk/source/vendor/supports-color/browser.js
+node_modules/chalk/source/vendor/supports-color/index.d.ts
+node_modules/chalk/source/vendor/supports-color/index.js

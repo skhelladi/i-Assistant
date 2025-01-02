@@ -731,8 +731,8 @@ settingsForm.addEventListener('submit', (e) => {
             .then(data => {
                 const publicIp = data.ip;
                 alert(`Port number changed to ${currentSettings.port}. Please update the web link to:
-                \n- http://localhost:${currentSettings.port}
-                \n- http://${publicIp}:${currentSettings.port}`);
+                \n- http://localhost:${currentSettings.port} (if running locally)
+                \n- http://${publicIp}:${currentSettings.port} (if running on server ${publicIp})`);
             })
             .catch(error => {
                 console.error('Error fetching public IP:', error);

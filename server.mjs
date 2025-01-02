@@ -10,6 +10,7 @@ import chatRouter from './routes/chat.js';
 import { cacheMiddleware, invalidateCache } from './cache.js';
 import ollama from 'ollama';
 import ip from 'ip'; // Import the ip module
+import chalk from 'chalk'; // Import chalk for colored console output
 
 // Define __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -247,9 +248,12 @@ app.get('/get-public-ip', (req, res) => {
 
 // Start the server only after the database is initialized
 app.listen(port, () => {
+    console.log(`\n----------------------------------------`);
     console.log(`Server listening at:`);
-    console.log(`\thttp://localhost:${port}`);
+    console.log(`----------------------------------------`);
+    console.log(chalk.green(`\thttp://localhost:${port}`));
     // Log the server listening at public ip address and port
-    console.log(`\thttp://${ip.address()}:${port}`);
-    console.log('Press Ctrl+C to stop the server');
+    console.log(chalk.green(`\thttp://${ip.address()}:${port}`));
+    console.log(`----------------------------------------`);
+    console.log(chalk.red('\nPress Ctrl+C to stop the server'));
 });
