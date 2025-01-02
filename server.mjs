@@ -246,13 +246,17 @@ app.get('/get-public-ip', (req, res) => {
     });
 });
 
+// Retrieve the installed version of Ollama
+const ollamaVersion = ollama.version || 'unknown';
+
 // Start the server only after the database is initialized
 app.listen(port, () => {
     console.log(`
     ----------------------------------------
     |          OllamaDesk Server           |
     ----------------------------------------
-    | Version: 1.0.0b                      |
+    | Ollama Version: ${ollamaVersion}              |
+    | Version: 1.0.0                       |
     | Developer: Sofiane KHELLADI          |
     | License: GPL-3                       |
     ----------------------------------------
