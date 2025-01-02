@@ -212,56 +212,21 @@ async function loadHistory() {
         if (!response.ok) throw new Error('Error loading history');
         const history = await response.json();
         
-        // Clear existing history
+        // Vider l'historique existant
         historyList.innerHTML = '';
         
-        // Load history in reverse chronological order
+        // Charger l'historique dans l'ordre chronologique inverse
         for (const question of history.reverse()) {
             const historyItem = document.createElement('div');
             historyItem.className = 'history-item';
+            historyItem.textContent = summarizeQuestion(question.question);
+            historyItem.title = question.question;
             historyItem.dataset.id = question.id;
 
-            // Add title span
-            const titleSpan = document.createElement('span');
-            titleSpan.className = 'history-title';
-            titleSpan.textContent = summarizeQuestion(question.question);
-            historyItem.appendChild(titleSpan);
-
-            // Create buttons container
-            const buttonsContainer = document.createElement('div');
-            buttonsContainer.className = 'history-buttons';
-
-            // Add edit button
-            const editButton = document.createElement('button');
-            editButton.className = 'edit-history-button';
-            editButton.innerHTML = '<svg><use href="#edit-icon"/></svg>';
-            editButton.title = 'Edit title';
-            editButton.onclick = async (e) => {
-                e.stopPropagation();
-                const newTitle = prompt('Enter new title:', question.question);
-                if (newTitle && newTitle !== question.question) {
-                    try {
-                        const response = await fetch(`/history/${question.id}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ newTitle })
-                        });
-                        
-                        if (!response.ok) throw new Error('Failed to update title');
-                        
-                        titleSpan.textContent = summarizeQuestion(newTitle);
-                    } catch (error) {
-                        console.error('Error updating title:', error);
-                    }
-                }
-            };
-            buttonsContainer.appendChild(editButton);
-
-            // Add delete button
+            // Ajouter le bouton de suppression
             const deleteButton = document.createElement('button');
             deleteButton.className = 'delete-button';
             deleteButton.innerHTML = '<svg><use href="#trash-icon"/></svg>';
-            deleteButton.title = 'Delete';
             deleteButton.onclick = async (e) => {
                 e.stopPropagation();
                 if (confirm('Are you sure you want to delete this question?')) {
@@ -269,15 +234,12 @@ async function loadHistory() {
                     historyItem.remove();
                 }
             };
-            buttonsContainer.appendChild(deleteButton);
+            historyItem.appendChild(deleteButton);
 
-            // Add buttons container to history item
-            historyItem.appendChild(buttonsContainer);
-
-            // Add click event to load discussion
+            // Ajouter l'événement de clic pour charger la discussion
             historyItem.addEventListener('click', () => loadDiscussion(question.id));
 
-            // Add to history list
+            // Ajouter à l'historique
             historyList.appendChild(historyItem);
         }
     } catch (error) {
