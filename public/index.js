@@ -130,15 +130,47 @@ function summarizeQuestion(question) {
 // Set to track added questions
 const addedQuestions = new Set();
 
+// Function to edit the title of a history item
+async function editHistoryTitle(questionId, oldTitle) {
+    const newTitle = prompt('Enter new title:', oldTitle || '');
+    if (!newTitle || newTitle.trim() === oldTitle) return;
+    try {
+        const response = await fetch(`/history/${questionId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ newTitle: newTitle.trim() })
+        });
+        if (!response.ok) throw new Error('Failed to update title');
+        // Update UI if needed
+        const item = document.querySelector(`[data-id="${questionId}"]`);
+        if (item) item.querySelector('.history-title').textContent = summarizeQuestion(newTitle.trim());
+    } catch (error) {
+        console.error('Error editing title:', error);
+    }
+}
+
 // Function to add summary to history
 async function addSummaryToHistory(summary, id) {
     const historyItem = document.createElement('div');
     historyItem.className = 'history-item';
-    historyItem.textContent = summarizeQuestion(summary);
-    historyItem.title = summary;
     historyItem.dataset.id = id;
 
-    // Ajouter le bouton de suppression
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'history-title';
+    titleSpan.textContent = summarizeQuestion(summary);
+    historyItem.appendChild(titleSpan);
+
+    // Add edit button
+    const editButton = document.createElement('button');
+    editButton.className = 'edit-history-button';
+    editButton.innerHTML = '<svg><use href="#edit-icon"/></svg>';
+    editButton.onclick = (e) => {
+        e.stopPropagation();
+        editHistoryTitle(id, summary);
+    };
+    historyItem.appendChild(editButton);
+
+    // Add delete button
     const deleteButton = document.createElement('button');
     deleteButton.className = 'delete-button';
     deleteButton.innerHTML = '<svg><use href="#trash-icon"/></svg>';
@@ -151,10 +183,10 @@ async function addSummaryToHistory(summary, id) {
     };
     historyItem.appendChild(deleteButton);
 
-    // Ajouter l'événement de clic pour charger la discussion
+    // Add click event to load discussion
     historyItem.addEventListener('click', () => loadDiscussion(id));
 
-    // Insérer en haut de la liste
+    // Insert at the top of the list
     historyList.insertBefore(historyItem, historyList.firstChild);
     
     return id;

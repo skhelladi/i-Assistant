@@ -103,4 +103,18 @@ router.post('/stop', async (req, res) => {
   }
 });
 
+// PUT /history/:id to update the title of a history item
+router.put('/history/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { newTitle } = req.body;
+        // Update the title in the database
+        await db.run('UPDATE questions SET title = ? WHERE id = ?', [newTitle, id]);
+        return res.json({ success: true });
+    } catch (error) {
+        console.error('Error updating title:', error);
+        return res.status(500).json({ success: false });
+    }
+});
+
 export default router;
