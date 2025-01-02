@@ -64,9 +64,25 @@ async function loadModels() {
 }
 
 // Save model selection
-modelSelect.addEventListener('change', (e) => {
+modelSelect.addEventListener('change', async (e) => {
+    const previousModel = currentModel;
     currentModel = e.target.value;
     localStorage.setItem('selectedModel', currentModel);
+    
+    try {
+        await fetch('/models/select', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                modelName: currentModel,
+                previousModel: previousModel
+            })
+        });
+    } catch (error) {
+        console.error('Error switching models:', error);
+    }
 });
 
 // Load models on startup
@@ -215,6 +231,15 @@ async function loadDiscussion(questionId) {
             }
         });
 
+        // Force this question as active
+        const item = document.querySelector(`[data-id="${questionId}"]`);
+        if (item) {
+            document.querySelectorAll('.history-item').forEach(i => {
+                i.classList.remove('active', 'selected');
+            });
+            item.classList.add('active', 'selected');
+        }
+
         const response = await fetch(`/discussion/${questionId}`);
         
         if (!response.ok) {
@@ -302,6 +327,9 @@ async function sendMessage(e) {
     }
     currentController = new AbortController();
 
+    // Disable interaction with the history list
+    historyList.style.pointerEvents = 'none';
+
     try {
         showLoadingIndicator();
         const userMessage = { role: 'user', content };
@@ -312,9 +340,8 @@ async function sendMessage(e) {
         // Obtenir l'ID de la session active
         let questionId = getCurrentQuestionId();
         
-        // Créer une nouvelle entrée UNIQUEMENT si aucune session n'est active
-        // ET si c'est une nouvelle session (pas de messages dans l'historique)
-        if (!questionId && messageHistory.length === 1) {
+        // Si pas de questionId actif, créer une nouvelle question dans l'historique
+        if (!questionId) {
             const historyResponse = await fetch('/history', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -333,7 +360,7 @@ async function sendMessage(e) {
             document.querySelector(`[data-id="${questionId}"]`).classList.add('active', 'selected');
         }
 
-        // Sauvegarder le message de l'utilisateur dans la discussion courante
+        // Sauvegarder le message dans la discussion existante
         await saveMessageToDiscussion(questionId, content, 'user');
 
         const assistantMessage = { role: 'assistant', content: '' };
@@ -412,6 +439,8 @@ async function sendMessage(e) {
         stopButton.disabled = true;
         retryButton.disabled = false;
         newSessionButton.disabled = false;
+        // Re-enable interaction with the history list
+        historyList.style.pointerEvents = 'auto';
     }
 }
 
@@ -701,6 +730,7 @@ if (savedTheme === 'light') {
 // Ajouter cette fonction utilitaire
 function getCurrentQuestionId() {
     const activeItem = document.querySelector('.history-item.active');
+    console.log('getCurrentQuestionId found:', activeItem ? activeItem.dataset.id : 'none');
     return activeItem ? activeItem.dataset.id : null;
 }
 

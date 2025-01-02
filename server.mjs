@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import modelsRouter from './routes/models.js';
 import chatRouter from './routes/chat.js';
 import { cacheMiddleware, invalidateCache } from './cache.js';
+import ollama from 'ollama';
 
 // Define __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -168,18 +169,23 @@ app.post('/discussion', async (req, res) => {
     }
 });
 
-// Gérer la fermeture propre de la base de données
-process.on('SIGINT', async () => {
-    try {
-        if (db) {
-            await db.close();
-            console.log('Database connection closed');
+// Clean shutdown handler
+['SIGINT', 'SIGTERM'].forEach(signal => {
+    process.on(signal, async () => {
+        try {
+            // Close database connection
+            if (db) {
+                await db.close();
+                console.log('Database connection closed');
+            }
+
+            console.log(`Server stopped by ${signal}`);
+            process.exit(0);
+        } catch (error) {
+            console.error('Error during shutdown:', error);
+            process.exit(1);
         }
-        process.exit(0);
-    } catch (error) {
-        console.error('Error closing database:', error);
-        process.exit(1);
-    }
+    });
 });
 
 // Démarrer le serveur seulement après l'initialisation de la base de données
