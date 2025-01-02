@@ -38,6 +38,7 @@ npm install sqlite3
 npm install ollama
 npm install crypto-js
 npm install node-cache
+npm install nodemon
 ```
 
 ### Install Ollama and its Modules
@@ -53,6 +54,14 @@ node server.mjs
 ```
 
 The server will start and listen on port 3000. You can access the application by navigating to `http://localhost:3000` in your web browser.
+
+### Start the Server in Development Mode
+
+```bash
+npm run dev
+```
+
+This will start the server using `nodemon`, which will automatically restart the server when file changes are detected.
 
 ### Functionality
 

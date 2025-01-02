@@ -1,1 +1,1 @@
-npm install express sqlite3 ollama
+npm install express sqlite3 ollama crypto-js node-cache nodemon
