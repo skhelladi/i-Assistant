@@ -200,6 +200,12 @@ async function deleteHistoryItem(id) {
             headers: { 'Content-Type': 'application/json' }
         });
         if (!response.ok) throw new Error('Error deleting history item');
+        
+        // Reset the discussion session if the deleted item was active
+        const activeItem = document.querySelector('.history-item.active');
+        if (activeItem && activeItem.dataset.id === id.toString()) {
+            startNewSession();
+        }
     } catch (error) {
         console.error('Error deleting history item:', error);
     }
