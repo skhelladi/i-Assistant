@@ -4,6 +4,7 @@ import { open } from 'sqlite';
 import crypto from 'crypto-js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import modelsRouter from './routes/models.js';
 import chatRouter from './routes/chat.js';
 import { cacheMiddleware, invalidateCache } from './cache.js';
@@ -15,7 +16,23 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express(); // Express instance
-const port = process.env.PORT || 3333; // Listening port
+
+const defaultPort = 3333;
+
+// Load settings from a JSON file
+const settingsPath = path.join(__dirname, 'settings.json');
+let settings = { port: defaultPort };
+
+if (fs.existsSync(settingsPath)) {
+    try {
+        const settingsData = fs.readFileSync(settingsPath, 'utf-8');
+        settings = JSON.parse(settingsData);
+    } catch (error) {
+        console.error('Error reading settings file:', error);
+    }
+}
+
+const port = process.env.PORT || settings.port || defaultPort;
 
 app.use(express.json());
 
@@ -188,6 +205,25 @@ app.put('/history/:id', async (req, res) => {
         console.error('Error updating question title:', error);
         res.status(500).json({ error: error.toString() });
     }
+});
+
+// Endpoint to save settings to a JSON file
+app.post('/save-settings', (req, res) => {
+    try {
+        const newSettings = req.body;
+        fs.writeFileSync(settingsPath, JSON.stringify(newSettings, null, 2));
+        console.log('Settings saved to file:', newSettings);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error saving settings to file:', error);
+        res.status(500).json({ error: error.toString() });
+    }
+});
+
+// Endpoint to get the public IP address
+app.get('/get-public-ip', (req, res) => {
+    const publicIp = ip.address();
+    res.json({ ip: publicIp });
 });
 
 // Clean shutdown handler

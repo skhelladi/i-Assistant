@@ -215,6 +215,12 @@
                     <textarea id="systemContent" name="systemContent" rows="4">You are a helpful AI assistant, always respond in the same language as the user. Always add a title to your messages if the question is about a specific topic. Write all the equations in LaTeX format.</textarea>
                 </div>
 
+                <!-- Add input field for port number -->
+                <div class="form-group">
+                    <label for="port">Port:</label>
+                    <input type="number" id="port" name="port" min="1" max="65535" value="3333">
+                </div>
+
                 <!-- Wrap buttons in a container for inline alignment -->
                 <div class="button-group" style="justify-content: center;">
                     <button type="submit" class="pagination-button">Save</button>

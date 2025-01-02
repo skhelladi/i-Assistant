@@ -1,0 +1,6 @@
+{
+  "stream": true,
+  "temperature": 0.7,
+  "systemContent": "Always summarize the question in one sentence. You are a helpful AI assistant, always respond in the same language as the user. Always add a title to your messages if the question is about a specific topic. Write all the equations in LaTeX format.",
+  "port": 3333
+}

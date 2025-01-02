@@ -24,11 +24,14 @@ const defaultSystemContent = questionSummary+"You are a helpful AI assistant, al
                              "if the question is about a specific topic. Write all the "+  
                              "equations in LaTeX format.";
 
+const defaultPort = 3333;
+
 // Initialize default settings
 let defaultSettings = {
     stream: true,
     temperature: 0.7,
-    systemContent: defaultSystemContent
+    systemContent: defaultSystemContent,
+    port: defaultPort
 };
 
 // Load settings from localStorage or use default settings
@@ -683,10 +686,25 @@ const settingsModal = document.getElementById('settings-modal');
 const closeSettings = document.getElementById('close-settings');
 const settingsForm = document.getElementById('settings-form');
 
+// Function to save settings to a JSON file
+async function saveSettingsToFile(settings) {
+    try {
+        await fetch('/save-settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(settings)
+        });
+        console.log('Settings saved to file:', settings);
+    } catch (error) {
+        console.error('Error saving settings to file:', error);
+    }
+}
+
 settingsButton.addEventListener('click', () => {
     settingsForm.stream.value = currentSettings.stream.toString();
     settingsForm.temperature.value = currentSettings.temperature;
     settingsForm.systemContent.value = currentSettings.systemContent;
+    settingsForm.port.value = currentSettings.port || defaultPort;
     settingsModal.style.display = 'flex';
 });
 
@@ -696,13 +714,32 @@ closeSettings.addEventListener('click', () => {
 
 settingsForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    const previousPort = currentSettings.port;
     currentSettings.stream = settingsForm.stream.value === 'true';
     currentSettings.temperature = parseFloat(settingsForm.temperature.value);
     currentSettings.systemContent = settingsForm.systemContent.value;
+    currentSettings.port = parseInt(settingsForm.port.value, 10) || defaultPort;
     localStorage.setItem('settings', JSON.stringify(currentSettings));
+    saveSettingsToFile(currentSettings); // Save settings to file
     settingsModal.style.display = 'none';
     console.log('Settings updated:', currentSettings);
     resetOllamaParameters(); // Reset Ollama parameters whenever settings change
+
+    if (currentSettings.port !== previousPort) {
+        fetch('/get-public-ip')
+            .then(response => response.json())
+            .then(data => {
+                const publicIp = data.ip;
+                alert(`Port number changed to ${currentSettings.port}. Please update the web link to:
+                \n- http://localhost:${currentSettings.port}
+                \n- http://${publicIp}:${currentSettings.port}`);
+            })
+            .catch(error => {
+                console.error('Error fetching public IP:', error);
+                alert(`Port number changed to ${currentSettings.port}. Please update the web link to:
+                \n- http://localhost:${currentSettings.port}`);
+            });
+    }
 });
 
 const resetSettingsButton = document.getElementById('reset-settings');
