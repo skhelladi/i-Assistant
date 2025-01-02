@@ -248,12 +248,18 @@ app.get('/get-public-ip', (req, res) => {
 
 // Start the server only after the database is initialized
 app.listen(port, () => {
-    console.log(`\n----------------------------------------`);
-    console.log(`Server listening at:`);
-    console.log(`----------------------------------------`);
+    console.log(`
+    ----------------------------------------
+    |          OllamaDesk Server           |
+    ----------------------------------------
+    | Version: 1.0.0b                      |
+    | Developer: Sofiane KHELLADI          |
+    | License: GPL-3                       |
+    ----------------------------------------
+    `);
+    console.log(`Server listening at:\n`);
     console.log(chalk.green(`\thttp://localhost:${port}`));
     // Log the server listening at public ip address and port
     console.log(chalk.green(`\thttp://${ip.address()}:${port}`));
-    console.log(`----------------------------------------`);
     console.log(chalk.red('\nPress Ctrl+C to stop the server'));
 });
