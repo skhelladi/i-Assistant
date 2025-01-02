@@ -1,8 +1,8 @@
-# i-@ssistant
+# OllamaDesk
 
-i-@ssistant serves as a graphical interface for [Ollama](https://ollama.com/) using free LLMs. The backend server is responsible for model management and processing.
+OllamaDesk serves as a graphical interface for [Ollama](https://ollama.com/) using free LLMs. The backend server is responsible for model management and processing.
 
-![i-@ssistant](assets/gui.png)
+![OllamaDesk](assets/gui.png)
 
 ## Features
 
@@ -26,8 +26,8 @@ i-@ssistant serves as a graphical interface for [Ollama](https://ollama.com/) us
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/skhelladi/i-assistant.git
-cd i-assistant
+git clone https://github.com/skhelladi/OllamaDesk.git
+cd OllamaDesk
 ```
 
 ### Install Dependencies
