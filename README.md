@@ -13,7 +13,7 @@ i-@ssistant serves as a graphical interface for [Ollama](https://ollama.com/) us
 - Settings for customization
 - Copy and paste functionality
 - Save answers to a text/markdown file
-- Save chat history
+- Save chat history (in progress)
 - Dark/light mode
 
 ## Installation
