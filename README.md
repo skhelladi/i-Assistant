@@ -53,7 +53,7 @@ Follow the instructions on the [Ollama website](https://ollama.com/) to install 
 node server.mjs
 ```
 
-The server will start and listen on port 3000. You can access the application by navigating to `http://localhost:3000` in your web browser.
+The server will start and listen on port 3333 (default). You can access the application by navigating to `http://localhost:3333` in your web browser.
 
 ### Start the Server in Development Mode
 
