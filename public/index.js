@@ -867,14 +867,57 @@ document.addEventListener('DOMContentLoaded', () => {
 // Function to toggle the sidebar visibility
 function toggleSidebar() {
     sidebar.classList.toggle('hidden');
-    if (sidebar.classList.contains('hidden')) {
-        toggleSidebarButton.innerHTML = '<svg><use href="#show-sidebar-icon"/></svg>';
-        toggleSidebarButton.classList.add('show-sidebar-button');
+    const isHidden = sidebar.classList.contains('hidden');
+    
+    // Créer le bouton dans le conteneur si la sidebar est cachée
+    let toggleButton = document.getElementById('toggle-sidebar-button');
+    
+    if (isHidden) {
+        // Si on cache la sidebar, déplacer le bouton dans le container
+        const container = document.querySelector('.container');
+        if (toggleButton && container) {
+            toggleButton.remove(); // Retirer l'ancien bouton
+            // Créer un nouveau bouton dans le container
+            const newToggleButton = document.createElement('button');
+            newToggleButton.id = 'toggle-sidebar-button';
+            newToggleButton.className = 'action-button';
+            newToggleButton.title = 'Show Sidebar';
+            newToggleButton.innerHTML = '<svg><use href="#show-sidebar-icon"/></svg>';
+            newToggleButton.style.position = 'fixed';
+            newToggleButton.style.top = '1rem';
+            newToggleButton.style.left = '1rem';
+            newToggleButton.style.zIndex = '1000';
+            newToggleButton.addEventListener('click', toggleSidebar);
+            container.appendChild(newToggleButton);
+            toggleButton = newToggleButton;
+        }
     } else {
-        toggleSidebarButton.innerHTML = '<svg><use href="#hide-sidebar-icon"/></svg>';
-        toggleSidebarButton.classList.remove('show-sidebar-button');
+        // Si on montre la sidebar, remettre le bouton dans la sidebar-header
+        const sidebarHeader = document.querySelector('.sidebar-header');
+        if (toggleButton && sidebarHeader) {
+            toggleButton.remove(); // Retirer l'ancien bouton
+            // Créer un nouveau bouton dans la sidebar
+            const newToggleButton = document.createElement('button');
+            newToggleButton.id = 'toggle-sidebar-button';
+            newToggleButton.title = 'Hide Sidebar';
+            newToggleButton.innerHTML = '<svg><use href="#hide-sidebar-icon"/></svg>';
+            newToggleButton.addEventListener('click', toggleSidebar);
+            sidebarHeader.appendChild(newToggleButton);
+        }
     }
 }
 
 // Add event listener for the toggle sidebar button
 toggleSidebarButton.addEventListener('click', toggleSidebar);
+
+// Add event listeners for tab buttons
+document.querySelectorAll('.tab-buttons button').forEach(button => {
+    button.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(tab => tab.style.display = 'none');
+        document.getElementById(button.dataset.tab).style.display = 'block';
+        
+        // Update active button
+        document.querySelectorAll('.tab-buttons button').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+    });
+});

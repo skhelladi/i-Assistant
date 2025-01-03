@@ -40,6 +40,7 @@ app.use(express.json());
 // We serve the public folder statically, which contains our index.html
 app.use(express.static('public'));
 
+
 // Use the modular routers
 app.use('/models', modelsRouter);
 app.use('/chat', chatRouter);

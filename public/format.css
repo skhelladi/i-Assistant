@@ -124,6 +124,7 @@ body {
     background: #1a1a1a; /* Very dark gray */
     border-bottom: 1px solid #444; /* Medium gray */
     color: #fff; /* White */
+    padding-left: 4rem; /* Ajout d'un padding à gauche pour éviter le chevauchement */
 }
 
 h1 {
@@ -292,6 +293,7 @@ body.light-mode .save-button svg {
     padding: 1rem 2rem;
     background: #1a1a1a;
     border-bottom: 1px solid #333;
+    padding-left: 4rem; /* Ajout d'un padding à gauche pour éviter le chevauchement */
 }
 
 .header-left {
@@ -299,6 +301,10 @@ body.light-mode .save-button svg {
     align-items: center;
     gap: 2rem;
     flex: 1;
+}
+
+.header-left h2 {
+    margin-left: 1rem; /* Ajoute une marge à gauche du titre */
 }
 
 .header-right {
@@ -1115,15 +1121,20 @@ body.light-mode #settings-form .pagination-button[type="button"]:hover {
 }
 
 .sidebar.hidden {
-    width: 0;
-    overflow: hidden;
+    display: none;
 }
 
+.sidebar.hidden + .container {
+    max-width: 100%;
+}
+
+/* Mise à jour des styles pour le header de la sidebar */
 .sidebar-header {
     display: flex;
-    justify-content: space-between; /* Aligne les éléments sur les extrémités */
-    align-items: center;            /* Centre verticalement les éléments */
+    justify-content: flex-start; /* Aligne les éléments depuis la gauche */
+    align-items: center;
     padding: 1rem;
+    gap: 1rem; /* Ajoute un espacement entre les éléments */
     background: #222;
     border-bottom: 1px solid #333;
 }
@@ -1146,7 +1157,13 @@ body.light-mode #settings-form .pagination-button[type="button"]:hover {
     border: none;
     cursor: pointer;
     padding: 0;
-    margin-left: 1rem;
+    margin-left: auto; 
+    width: 42px;
+    height: 42px;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #toggle-sidebar-button svg {
@@ -1327,4 +1344,51 @@ body.light-mode .help-icon {
 
 body.light-mode .help-icon:hover {
     background: #42a5f5;
+}
+
+/* Home container */
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+}
+
+/* Options */
+.options {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+/* Option */
+.option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    font-size: 1.2rem;
+}
+
+.option svg {
+    width: 64px;
+    height: 64px;
+    fill: currentColor;
+    margin-bottom: 1rem;
+}
+
+.option:hover svg {
+    fill: #2563eb;
+}
+
+/* Home icon */
+.home-icon svg {
+    fill: #ffffff;
+}
+
+body.light-mode .home-icon svg {
+    fill: #0d47a1; /* Dark blue for light mode */
 }
