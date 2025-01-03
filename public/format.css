@@ -1047,6 +1047,130 @@ body.light-mode #settings-form .pagination-button[type="button"]:hover {
 /* Media queries for responsiveness */
 @media (max-width: 768px) {
     .message {
+        max-width: 100%;
+        margin: 0.5rem 0;
+        padding: 1rem;
+    }
+
+    .user-message, .assistant-message {
+        margin: 0.5rem 0;
+        width: 100%;
+    }
+
+    .header-container {
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+
+    .header-left h2 {
+        font-size: 1.2rem;
+        margin-left: 2.5rem;
+    }
+
+    .model-selector {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .model-selector select {
+        max-width: 120px;
+        font-size: 0.9rem;
+    }
+
+    .header-right {
+        gap: 0.25rem;
+    }
+
+    .action-button {
+        width: 36px;
+        height: 36px;
+    }
+
+    .action-button svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .input-container {
+        padding: 0.5rem;
+    }
+
+    #chat {
+        font-size: 1rem;
+        min-height: 36px;
+    }
+
+    .sidebar {
+        width: 80%;
+        position: fixed;
+        z-index: 1000;
+        height: 100%;
+    }
+
+    .sidebar.hidden + .container {
+        margin-left: 0;
+        max-width: 100%;
+    }
+
+    .container {
+        max-width: 100%;
+        margin-left: 0;
+    }
+
+    /* Ajustement pour le bouton toggle quand la sidebar est cachée */
+    .container #toggle-sidebar-button {
+        position: fixed;
+        top: 0.5rem;
+        left: 0;
+        z-index: 1001;
+        width: 36px;
+        height: 36px;
+        border-radius: 0 4px 4px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-top: 2.5rem; /* Espace pour le bouton toggle */
+    }
+
+    .header-left {
+        width: 100%;
+    }
+
+    .header-right {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+    }
+
+    .model-selector {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .message {
+        padding: 0.75rem;
+    }
+
+    .message-header {
+        font-size: 0.8rem;
+    }
+
+    .history-list {
+        padding: 0.5rem;
+    }
+
+    .history-item {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .message {
         max-width: 95%;
         margin: 0.5rem 0;
     }
@@ -1391,4 +1515,88 @@ body.light-mode .help-icon:hover {
 
 body.light-mode .home-icon svg {
     fill: #0d47a1; /* Dark blue for light mode */
+}
+
+/* Updated Mobile Sidebar Styles */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 85%; /* Plus large sur mobile */
+        max-width: 300px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1001;
+        background: #1a1a1a;
+    }
+
+    .sidebar:not(.hidden) {
+        transform: translateX(0);
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Overlay sombre quand la sidebar est ouverte */
+    .sidebar:not(.hidden)::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: -1;
+    }
+
+    .container {
+        margin-left: 0;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    /* Ajustement du bouton toggle */
+    #toggle-sidebar-button {
+        position: fixed;
+        top: 0.5rem;
+        left: 0.5rem;
+        z-index: 1002;
+        width: 36px;
+        height: 36px;
+        padding: 0.5rem;
+        background: #333;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Ajustement du header pour éviter le chevauchement avec le bouton */
+    .header-container {
+        padding-left: 3.5rem;
+    }
+
+    /* Mode clair pour mobile */
+    body.light-mode .sidebar {
+        background: #f0f9ff;
+    }
+
+    body.light-mode #toggle-sidebar-button {
+        background: #e3f2fd;
+    }
+}
+
+/* Ajustements spécifiques pour très petits écrans */
+@media (max-width: 480px) {
+    .sidebar {
+        width: 100%;
+        max-width: none;
+    }
+
+    .history-list {
+        padding: 0.5rem;
+    }
+
+    .history-item {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
 }
