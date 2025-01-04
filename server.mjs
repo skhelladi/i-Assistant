@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import modelsRouter from './routes/models.js';
 import chatRouter from './routes/chat.js';
+import crewRouter from './routes/crew.js';
 import { cacheMiddleware, invalidateCache } from './cache.js';
 import ollama from 'ollama';
 import ip from 'ip'; // Import the ip module
@@ -44,6 +45,7 @@ app.use(express.static('public'));
 // Use the modular routers
 app.use('/models', modelsRouter);
 app.use('/chat', chatRouter);
+app.use('/api/crew', crewRouter);
 
 // Database setup
 let db = null;
@@ -231,7 +233,9 @@ app.get('/get-public-ip', (req, res) => {
 // Endpoint to fetch LLM models from Ollama
 app.get('/api/ollama/models', async (req, res) => {
     try {
-        const models = await ollama.list(); // Ensure this function correctly fetches models
+        const response = await ollama.list();
+        // Extraire uniquement les noms des modèles de la réponse
+        const models = response.models.map(model => model.name);
         res.json({ models });
     } catch (error) {
         console.error('Error fetching LLM models:', error);
