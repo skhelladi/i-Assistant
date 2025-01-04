@@ -228,6 +228,17 @@ app.get('/get-public-ip', (req, res) => {
     res.json({ ip: publicIp });
 });
 
+// Endpoint to fetch LLM models from Ollama
+app.get('/api/ollama/models', async (req, res) => {
+    try {
+        const models = await ollama.list(); // Ensure this function correctly fetches models
+        res.json({ models });
+    } catch (error) {
+        console.error('Error fetching LLM models:', error);
+        res.status(500).json({ error: 'Failed to fetch LLM models' });
+    }
+});
+
 // Clean shutdown handler
 ['SIGINT', 'SIGTERM'].forEach(signal => {
     process.on(signal, async () => {

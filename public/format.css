@@ -1,3 +1,29 @@
+:root {
+    --background-color: #333;
+    --text-color: #fff;
+    --border-color: #444;
+    --primary-color: #2563eb;
+    --primary-hover-color: #1d4ed8;
+    --secondary-color: #444;
+    --dark-background: #1a1a1a;
+    --dark-text: #fff;
+    --dark-border: #333;
+    --dark-secondary: #2d3748;
+}
+
+body.light-mode {
+    --background-color: #fff;
+    --text-color: #333;
+    --border-color: #e5e7eb;
+    --primary-color: #2563eb;
+    --primary-hover-color: #1d4ed8;
+    --secondary-color: #f3f4f6;
+    --dark-background: #f9fafb;
+    --dark-text: #111;
+    --dark-border: #e5e7eb;
+    --dark-secondary: #f3f4f6;
+}
+
 /* Basic styles */
 body { 
     font-family: system-ui; 
@@ -1599,4 +1625,62 @@ body.light-mode .home-icon svg {
         padding: 0.5rem;
         font-size: 0.85rem;
     }
+}
+
+/* Multi-Agent UI Styles */
+.agent-card {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.agent-input {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.agent-button {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.agent-button:hover {
+    background-color: var(--primary-hover-color);
+}
+
+.agent-button-outline {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.agent-heading {
+    color: var(--text-color);
+}
+
+.agent-text {
+    color: var(--text-color);
+}
+
+body.dark-theme .agent-card {
+    background-color: var(--dark-background);
+    color: var(--dark-text);
+    border-color: var(--dark-border);
+}
+
+body.dark-theme .agent-input {
+    background-color: var(--dark-background);
+    color: var(--dark-text);
+    border-color: var(--dark-border);
+}
+
+body.dark-theme .agent-button-outline {
+    background-color: var(--dark-secondary);
+    color: var(--dark-text);
+    border-color: var(--dark-border);
+}
+
+#agent-ui-root {
+    background-color: var(--dark-background) !important;
 }

@@ -11,9 +11,16 @@
         "chalk": "^5.2.0"
     },
     "scripts": {
-        "dev": "nodemon server.mjs"
+        "dev": "nodemon server.mjs",
+        "build": "babel public/multiAgentUI.js --out-dir public/dist --presets=@babel/preset-react",
+        "prestart": "npm run build",
+        "watch": "babel public/multiAgentUI.js --out-dir public/dist --presets=@babel/preset-react --watch"
     },
     "devDependencies": {
-        "nodemon": "^3.1.9"
+        "nodemon": "^3.1.9",
+        "@babel/cli": "^7.23.0",
+        "@babel/core": "^7.23.0",
+        "@babel/preset-env": "^7.22.20",
+        "@babel/preset-react": "^7.22.15"
     }
 }

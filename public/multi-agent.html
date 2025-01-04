@@ -5,9 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi-Agent</title>
+    <!-- Ajouter les styles pour les composants UI -->
     <link rel="stylesheet" href="format.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Ajout des dépendances React -->
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
     <!-- ...existing code... -->
     <!-- Include icons -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/assets/favicon.ico">
     <script>
         fetch('icons.html')
             .then(response => response.text())
@@ -59,34 +66,8 @@
                     </button>
                 </div>
             </div>
-            <!-- <div class="chat-container" id="reponse"></div>
-            <div class="input-container">
-                <form class="input-group">
-                    <div class="input-wrapper">
-                        <div id="loading-indicator" class="loading-indicator" style="display: none;">
-                            <svg><use href="#loading-icon"/></svg>
-                        </div>
-                        <input type="text" id="chat" placeholder="   Your message...">
-                    </div>
-                </form>
-                <div class="input-actions">
-                    <button type="submit" class="action-button send" id="send-button" title="Send">
-                        <svg>
-                            <use href="#send-icon" />
-                        </svg>
-                    </button>
-                    <button type="button" class="action-button stop" id="stop-button" title="Stop" disabled>
-                        <svg>
-                            <use href="#stop-icon" />
-                        </svg>
-                    </button>
-                    <button type="button" class="action-button retry" id="retry-button" title="Retry" disabled>
-                        <svg>
-                            <use href="#retry-icon" />
-                        </svg>
-                    </button>
-                </div>
-            </div> -->
+            <!-- Remplacer le chat-container par le conteneur React -->
+            <div id="agent-ui-root" class="flex-grow overflow-auto p-4"></div>
         </div>
     </div>
 
@@ -109,7 +90,24 @@
         </div>
     </div>
 
-    <script src="./index.js"></script>
+    <!-- Load compiled script instead of using Babel in browser -->
+    <script src="dist/agentUI.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM fully loaded and parsed');
+            const rootElement = document.getElementById('agent-ui-root');
+            if (rootElement && window.AgentUI) {
+                ReactDOM.render(
+                    React.createElement(window.AgentUI),
+                    rootElement
+                );
+            } else {
+                console.error('Root element or AgentUI not found');
+            }
+        });
+    </script>
+
+    <script src="./multiAgent.js"></script>
 </body>
 
 </html>

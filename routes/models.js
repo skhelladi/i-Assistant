@@ -32,10 +32,21 @@ async function stopModel(modelName) {
     }
 }
 
+// Function to list models
+export async function listModels() {
+    try {
+        const models = await ollama.list();
+        return models;
+    } catch (error) {
+        console.error('Error listing models:', error);
+        throw error;
+    }
+}
+
 // Get models list (cached)
 router.get('/', cacheMiddleware(300), async (req, res) => {
     try {
-        const models = await ollama.list();
+        const models = await listModels();
         res.json(models);
     } catch (error) {
         console.error('Error listing models:', error);

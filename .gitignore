@@ -2770,3 +2770,11 @@ node_modules/chalk/source/vendor/supports-color/browser.d.ts
 node_modules/chalk/source/vendor/supports-color/browser.js
 node_modules/chalk/source/vendor/supports-color/index.d.ts
 node_modules/chalk/source/vendor/supports-color/index.js
+node_modules
+archives/js/agentSystemUI.js
+archives/tsconfig.json
+archives/agentSystem.mjs
+archives/agentSystem.js
+archives/agent.js
+archives/css/agent-styles.css
+.database.sqlite.bak
