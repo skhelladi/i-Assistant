@@ -19,10 +19,10 @@ let messageHistory = [];
 let responseCount = 0;
 
 const questionSummary = "Always summarize the question in one sentence. ";
-const defaultSystemContent = questionSummary+"You are a helpful AI assistant, always respond in the same "+
-                             "language as the user. Always add a title to your messages "+ 
-                             "if the question is about a specific topic. Write all the "+  
-                             "equations in LaTeX format.";
+const defaultSystemContent = questionSummary + "You are a helpful AI assistant, always respond in the same " +
+    "language as the user. Always add a title to your messages " +
+    "if the question is about a specific topic. Write all the " +
+    "equations in LaTeX format.";
 
 const defaultPort = 3333;
 
@@ -73,7 +73,7 @@ modelSelect.addEventListener('change', async (e) => {
     const previousModel = currentModel;
     currentModel = e.target.value;
     localStorage.setItem('selectedModel', currentModel);
-    
+
     try {
         await fetch('/models/select', {
             method: 'POST',
@@ -102,7 +102,7 @@ async function stopRequest() {
         try {
             await fetch('/chat/stop', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ requestId: currentRequestId })
             });
         } catch (error) {
@@ -193,7 +193,7 @@ async function addSummaryToHistory(summary, id) {
 
     // Insert at the top of the list
     historyList.insertBefore(historyItem, historyList.firstChild);
-    
+
     return id;
 }
 
@@ -205,7 +205,7 @@ async function deleteHistoryItem(id) {
             headers: { 'Content-Type': 'application/json' }
         });
         if (!response.ok) throw new Error('Error deleting history item');
-        
+
         // Reset the discussion session if the deleted item was active
         const activeItem = document.querySelector('.history-item.active');
         if (activeItem && activeItem.dataset.id === id.toString()) {
@@ -222,10 +222,10 @@ async function loadHistory() {
         const response = await fetch('/history');
         if (!response.ok) throw new Error('Error loading history');
         const history = await response.json();
-        
+
         // Clear existing history
         historyList.innerHTML = '';
-        
+
         // Load history in reverse chronological order
         for (const question of history.reverse()) {
             const historyItem = document.createElement('div');
@@ -257,17 +257,17 @@ async function loadHistory() {
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ newTitle })
                         });
-                        
+
                         if (!response.ok) {
                             throw new Error('Failed to update title');
                         }
-                        
+
                         // Update the title in the UI
                         titleSpan.textContent = summarizeQuestion(newTitle);
-                        
+
                         // Update the title in the history item's data
                         historyItem.dataset.title = newTitle;
-                        
+
                         console.log('Title updated successfully');
                     } catch (error) {
                         console.error('Error updating title:', error);
@@ -331,7 +331,7 @@ async function loadDiscussion(questionId) {
         }
 
         const response = await fetch(`/discussion/${questionId}`);
-        
+
         if (!response.ok) {
             throw new Error(`Error loading discussion: ${response.statusText}`);
         }
@@ -369,7 +369,7 @@ async function loadDiscussion(questionId) {
     } catch (error) {
         console.error('Error loading discussion:', error);
         resultat.innerHTML = `<div class="error">Error loading discussion: ${error.message}</div>`;
-        
+
         // Réactiver les boutons en cas d'erreur
         sendButton.disabled = false;
         stopButton.disabled = true;
@@ -385,7 +385,7 @@ function startNewSession() {
     resultat.innerHTML = '';
     messageHistory = [];
     input.value = '';
-    
+
     // Désactiver la session active dans l'historique
     document.querySelectorAll('.history-item').forEach(item => {
         item.classList.remove('active', 'selected');
@@ -395,7 +395,7 @@ function startNewSession() {
 // Send message function
 async function sendMessage(e) {
     e.preventDefault();
-    
+
     const content = input.value.trim();
     if (!content) {
         console.log('Message empty, not sending');
@@ -429,7 +429,7 @@ async function sendMessage(e) {
 
         // Obtenir l'ID de la session active
         let questionId = getCurrentQuestionId();
-        
+
         // Si pas de questionId actif, créer une nouvelle question dans l'historique
         if (!questionId) {
             const historyResponse = await fetch('/history', {
@@ -444,7 +444,7 @@ async function sendMessage(e) {
 
             const historyResult = await historyResponse.json();
             questionId = historyResult.id;
-            
+
             // Ajouter à l'historique visuel et activer la nouvelle session
             await addSummaryToHistory(content, questionId);
             document.querySelector(`[data-id="${questionId}"]`).classList.add('active', 'selected');
@@ -453,7 +453,61 @@ async function sendMessage(e) {
         // Sauvegarder le message dans la discussion existante
         await saveMessageToDiscussion(questionId, content, 'user');
 
+        let finalPrompt = content;
+        let searchContext = '';
+
+        // Si la recherche web est activée, effectuer la recherche
+        if (enableSearchCheckbox.checked) {
+            console.log('Performing web search for:', content);
+            const searchingMessage = {
+                role: 'system',
+                content: 'Searching the web...'
+            };
+            displayMessage(searchingMessage);
+
+            searchContext = await performWebSearch(content);
+            // Supprimer le message "Searching..."
+            resultat.lastChild.remove();
+
+            if (searchContext) {
+                const searchResults = {
+                    role: 'system',
+                    content: `<div class="web-search-results">
+                        <h4>Web Search Results</h4>
+                        <div class="search-content">
+                            <ol>
+                                ${searchContext.split('\n').map(line => `<li>${line.substring(line.indexOf('.') + 2)}</li>`).join('')}
+                            </ol>
+                        </div>
+                    </div>`
+                };
+                displayMessage(searchResults);
+                messageHistory.push({
+                    role: 'system',
+                    content: `Web Search Results:\n${searchContext}`
+                });
+                
+                // Modifier le prompt utilisateur pour inclure le contexte
+                const userMessageWithContext = {
+                    role: 'user',
+                    content: `Based on the following web search results:\n${searchContext}\n\nAnswer this question: ${content}`
+                };
+                
+                // Remplacer le dernier message utilisateur dans l'historique
+                messageHistory[messageHistory.length - 1] = userMessageWithContext;
+            } else {
+                const noResultsMessage = {
+                    role: 'system',
+                    content: 'No relevant search results found.'
+                };
+                displayMessage(noResultsMessage);
+            }
+        }
+
         const assistantMessage = { role: 'assistant', content: '' };
+        let messageElement = null;
+
+        console.log('Sending message history:', messageHistory); // Debug log
 
         const response = await fetch('/chat', {
             method: 'POST',
@@ -476,8 +530,10 @@ async function sendMessage(e) {
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
+        let fullResponse = '';
 
-        const messageElement = displayMessage(assistantMessage);
+        // Créer l'élément du message uniquement après avoir reçu la première partie de la réponse
+        messageElement = displayMessage(assistantMessage);
 
         while (true) {
             const { done, value } = await reader.read();
@@ -485,6 +541,7 @@ async function sendMessage(e) {
 
             const text = decoder.decode(value, { stream: true });
             const lines = text.split('\n');
+
             for (const line of lines) {
                 if (line.startsWith('data: ')) {
                     try {
@@ -493,14 +550,21 @@ async function sendMessage(e) {
                             currentRequestId = data.requestId;
                             continue;
                         }
-                        assistantMessage.content += data.content || '';
-                        messageElement.querySelector('.message-content').innerHTML = marked.parse(assistantMessage.content);
-                        messageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                        if (data.content) {
+                            fullResponse += data.content;
+                            assistantMessage.content = fullResponse;
+                            if (messageElement) {
+                                messageElement.querySelector('.message-content').innerHTML = marked.parse(fullResponse);
+                                messageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                            }
 
-                        const chatContainer = document.querySelector('.chat-container');
-                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                            const chatContainer = document.querySelector('.chat-container');
+                            if (chatContainer) {
+                                chatContainer.scrollTop = chatContainer.scrollHeight;
+                            }
 
-                        hljs.highlightAll();
+                            hljs.highlightAll();
+                        }
                         hideLoadingIndicator();
                     } catch (e) {
                         console.error('Error parsing JSON:', e, line);
@@ -509,10 +573,11 @@ async function sendMessage(e) {
             }
         }
 
-        if (assistantMessage.content) {
+        if (fullResponse) {
+            assistantMessage.content = fullResponse;
             messageHistory.push(assistantMessage);
             // Sauvegarder la réponse de l'assistant dans la même discussion
-            await saveMessageToDiscussion(questionId, assistantMessage.content, 'assistant');
+            await saveMessageToDiscussion(questionId, fullResponse, 'assistant');
         }
 
     } catch (error) {
@@ -540,7 +605,7 @@ async function saveMessageToDiscussion(questionId, message, role) {
         console.error('Missing required parameters for saving message:', { questionId, message, role });
         return;
     }
-    
+
     try {
         console.log('Saving message:', { questionId, message, role }); // Debug log
         const response = await fetch('/discussion', {
@@ -548,16 +613,16 @@ async function saveMessageToDiscussion(questionId, message, role) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ questionId, message, role })
         });
-        
+
         if (!response.ok) {
             throw new Error(`Failed to save message: ${response.statusText}`);
         }
-        
+
         const result = await response.json();
         if (!result.success) {
             throw new Error('Failed to save message to discussion');
         }
-        
+
         console.log(`Message saved successfully for question ${questionId}`);
     } catch (error) {
         console.error('Error saving message to discussion:', error);
@@ -868,10 +933,10 @@ document.addEventListener('DOMContentLoaded', () => {
 function toggleSidebar() {
     sidebar.classList.toggle('hidden');
     const isHidden = sidebar.classList.contains('hidden');
-    
+
     // Créer le bouton dans le conteneur si la sidebar est cachée
     let toggleButton = document.getElementById('toggle-sidebar-button');
-    
+
     if (isHidden) {
         // Si on cache la sidebar, déplacer le bouton dans le container
         const container = document.querySelector('.container');
@@ -915,9 +980,45 @@ document.querySelectorAll('.tab-buttons button').forEach(button => {
     button.addEventListener('click', () => {
         document.querySelectorAll('.tab').forEach(tab => tab.style.display = 'none');
         document.getElementById(button.dataset.tab).style.display = 'block';
-        
+
         // Update active button
         document.querySelectorAll('.tab-buttons button').forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
     });
 });
+
+// Add a checkbox for enabling web search
+const enableSearchLabel = document.createElement('label');
+enableSearchLabel.textContent = 'Enable Web Search';
+const enableSearchCheckbox = document.createElement('input');
+enableSearchCheckbox.type = 'checkbox';
+enableSearchCheckbox.id = 'enable-web-search';
+enableSearchLabel.appendChild(enableSearchCheckbox);
+
+// Insert the checkbox next to the model select
+const modelSelector = document.querySelector('.model-selector');
+modelSelector.appendChild(enableSearchLabel);
+
+// Function to perform web search (similar to performWebSearch in Index.jsx)
+async function performWebSearch(query) {
+    try {
+        const response = await fetch(
+            `https://api.allorigins.win/get?url=${encodeURIComponent(`https://html.duckduckgo.com/html/?q=${query}`)}`
+        );
+        const data = await response.json();
+        if (!data.contents) throw new Error('No search results found');
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data.contents, 'text/html');
+        const results = Array.from(doc.querySelectorAll('.result__snippet'))
+            .map(snippet => snippet.textContent.trim())
+            .filter(Boolean)
+            .slice(0, 10);
+
+        // Formater les résultats en liste numérotée
+        return results.map((r, index) => `${index + 1}. ${r}`).join('\n');
+    } catch (error) {
+        console.error('Web search error:', error);
+        return '';
+    }
+}

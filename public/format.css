@@ -1684,3 +1684,101 @@ body.dark-theme .agent-button-outline {
 #agent-ui-root {
     background-color: var(--dark-background) !important;
 }
+
+/* Web Search Results Styles */
+.web-search-results {
+    background: #2a2a2a;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.web-search-results h4 {
+    margin: 0 0 1rem 0;
+    color: #aaa;
+    font-size: 1rem;
+    border-bottom: 1px solid #444;
+    padding-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.web-search-results .search-content {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 1rem;
+    margin-top: 0.5rem;
+}
+
+.web-search-results ol {
+    margin: 0;
+    padding-left: 2rem;
+    list-style-position: outside;
+}
+
+.web-search-results li {
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    color: #ddd;
+    padding-left: 0.5rem;
+    position: relative;
+}
+
+.web-search-results li::before {
+    content: counter(list-item) ".";
+    position: absolute;
+    left: -2rem;
+    width: 1.5rem;
+    text-align: right;
+    color: #666;
+}
+
+/* Light mode styles for web search results */
+body.light-mode .web-search-results {
+    background: #f0f4f8;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode .web-search-results h4 {
+    color: #2d3748;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+body.light-mode .web-search-results li {
+    color: #4a5568;
+}
+
+body.light-mode .web-search-results li::before {
+    color: #718096;
+}
+
+/* Scrollbar styles for search results */
+.web-search-results .search-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.web-search-results .search-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.web-search-results .search-content::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 8px;
+}
+
+body.light-mode .web-search-results .search-content::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+}
+
+/* Hover effect on search results */
+.web-search-results li:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+body.light-mode .web-search-results li:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
