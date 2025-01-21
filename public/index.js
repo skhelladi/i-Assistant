@@ -537,54 +537,70 @@ async function sendMessage(e) {
 
         let thinkMode = false;
         let thinkBuffer = '';
-
-        let partialBuffer = '';
+        let tagBuffer = '';
+        let isCollectingTag = false;
 
         function handleIncomingToken(token) {
-            partialBuffer += token;
-            // While we can find either <think> or </think> in partialBuffer, process them
-            let startIndex;
-            let endIndex;
-            while (
-                (startIndex = partialBuffer.indexOf('<think>')) !== -1 ||
-                (startIndex = partialBuffer.indexOf('</think>')) !== -1
-            ) {
-                const isOpeningTag = partialBuffer.indexOf('<think>') !== -1 &&
-                                     (partialBuffer.indexOf('</think>') === -1 ||
-                                      partialBuffer.indexOf('<think>') < partialBuffer.indexOf('</think>'));
-
-                if (isOpeningTag) {
-                    // Handle text before <think>
-                    const tagPos = partialBuffer.indexOf('<think>');
-                    const textBefore = partialBuffer.slice(0, tagPos);
-                    if (!thinkMode) {
-                        // ...append textBefore to normal flow...
+            // Process token character by character for tag detection
+            for (let char of token) {
+                if (char === '<') {
+                    isCollectingTag = true;
+                    tagBuffer = '<';
+                    continue;
+                }
+                
+                if (isCollectingTag) {
+                    tagBuffer += char;
+                    
+                    // Check for opening tag completion
+                    if (tagBuffer === '<think>') {
+                        isCollectingTag = false;
+                        tagBuffer = '';
+                        thinkMode = true;
+                        continue;
                     }
-                    partialBuffer = partialBuffer.slice(tagPos + 7);
-                    thinkMode = true;
+                    
+                    // Check for closing tag completion
+                    if (tagBuffer === '</think>') {
+                        isCollectingTag = false;
+                        tagBuffer = '';
+                        thinkMode = false;
+                        // Process accumulated think buffer
+                        if (thinkBuffer) {
+                            const thinkSection = document.createElement('div');
+                            thinkSection.className = 'think-section';
+                            thinkSection.textContent = thinkBuffer;
+                            messageElement.querySelector('.message-content').appendChild(thinkSection);
+                            thinkBuffer = '';
+                        }
+                        continue;
+                    }
+                    
+                    // If current tag buffer is not a potential think tag, flush it
+                    if (!'<think>'.startsWith(tagBuffer) && !'</think>'.startsWith(tagBuffer)) {
+                        if (thinkMode) {
+                            thinkBuffer += tagBuffer;
+                        } else {
+                            assistantMessage.content += tagBuffer;
+                        }
+                        isCollectingTag = false;
+                        tagBuffer = '';
+                    }
+                    
+                    continue;
+                }
+                
+                // Regular character processing
+                if (thinkMode) {
+                    thinkBuffer += char;
                 } else {
-                    // Handle text before </think>
-                    const tagPos = partialBuffer.indexOf('</think>');
-                    const textBefore = partialBuffer.slice(0, tagPos);
-                    if (thinkMode) {
-                        thinkBuffer += textBefore;
-                    } else {
-                        // ...append textBefore to normal flow...
-                    }
-                    partialBuffer = partialBuffer.slice(tagPos + 8);
-                    // Flush think buffer
-                    updateThinkSection(thinkBuffer);
-                    thinkBuffer = '';
-                    thinkMode = false;
+                    assistantMessage.content += char;
                 }
             }
-            // Any remaining text after the last tag
-            if (thinkMode) {
-                thinkBuffer += partialBuffer;
-                partialBuffer = '';
-            } else {
-                // ...append partialBuffer to normal flow...
-                partialBuffer = '';
+            
+            // Update display if not in think mode
+            if (!thinkMode && messageElement) {
+                messageElement.querySelector('.message-content').innerHTML = marked.parse(assistantMessage.content);
             }
         }
 
@@ -604,19 +620,7 @@ async function sendMessage(e) {
                             continue;
                         }
                         if (data.content) {
-                            fullResponse += data.content;
-                            assistantMessage.content = fullResponse;
-                            if (messageElement) {
-                                messageElement.querySelector('.message-content').innerHTML = marked.parse(fullResponse);
-                                messageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                            }
-
-                            const chatContainer = document.querySelector('.chat-container');
-                            if (chatContainer) {
-                                chatContainer.scrollTop = chatContainer.scrollHeight;
-                            }
-
-                            hljs.highlightAll();
+                            handleIncomingToken(data.content);
                         }
                         hideLoadingIndicator();
                     } catch (e) {
