@@ -1793,6 +1793,16 @@ body.light-mode .web-search-results li:hover {
     color: #999;
     font-style: italic;
     border-radius: 0 4px 4px 0;
+    position: relative;
+}
+
+.think-section::before {
+    content: "Reasoning:";
+    display: block;
+    font-weight: bold;
+    font-style: normal;
+    color: #bbb;
+    margin-bottom: 0.5rem;
 }
 
 /* Light mode styles for think section */
@@ -1800,4 +1810,8 @@ body.light-mode .think-section {
     background: #f5f5f5;
     border-left: 3px solid #90caf9;
     color: #666;
+}
+
+body.light-mode .think-section::before {
+    color: #444;
 }

@@ -541,7 +541,7 @@ async function sendMessage(e) {
         function handleIncomingToken(token) {
             if (token.includes('<think>')) {
                 thinkMode = true;
-                token = token.replace('<think>', 'Reasoning:\n');
+                token = token.replace('<think>', '');
             }
             if (token.includes('</think>')) {
                 thinkMode = false;
