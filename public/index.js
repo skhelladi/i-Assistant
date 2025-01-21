@@ -538,22 +538,53 @@ async function sendMessage(e) {
         let thinkMode = false;
         let thinkBuffer = '';
 
+        let partialBuffer = '';
+
         function handleIncomingToken(token) {
-            if (token.includes('<think>')) {
-                thinkMode = true;
-                token = token.replace('<think>', '');
+            partialBuffer += token;
+            // While we can find either <think> or </think> in partialBuffer, process them
+            let startIndex;
+            let endIndex;
+            while (
+                (startIndex = partialBuffer.indexOf('<think>')) !== -1 ||
+                (startIndex = partialBuffer.indexOf('</think>')) !== -1
+            ) {
+                const isOpeningTag = partialBuffer.indexOf('<think>') !== -1 &&
+                                     (partialBuffer.indexOf('</think>') === -1 ||
+                                      partialBuffer.indexOf('<think>') < partialBuffer.indexOf('</think>'));
+
+                if (isOpeningTag) {
+                    // Handle text before <think>
+                    const tagPos = partialBuffer.indexOf('<think>');
+                    const textBefore = partialBuffer.slice(0, tagPos);
+                    if (!thinkMode) {
+                        // ...append textBefore to normal flow...
+                    }
+                    partialBuffer = partialBuffer.slice(tagPos + 7);
+                    thinkMode = true;
+                } else {
+                    // Handle text before </think>
+                    const tagPos = partialBuffer.indexOf('</think>');
+                    const textBefore = partialBuffer.slice(0, tagPos);
+                    if (thinkMode) {
+                        thinkBuffer += textBefore;
+                    } else {
+                        // ...append textBefore to normal flow...
+                    }
+                    partialBuffer = partialBuffer.slice(tagPos + 8);
+                    // Flush think buffer
+                    updateThinkSection(thinkBuffer);
+                    thinkBuffer = '';
+                    thinkMode = false;
+                }
             }
-            if (token.includes('</think>')) {
-                thinkMode = false;
-                token = token.replace('</think>', '');
-                // Flush the buffered content into the think-section
-                updateThinkSection(thinkBuffer);
-                thinkBuffer = '';
-            }
+            // Any remaining text after the last tag
             if (thinkMode) {
-                thinkBuffer += token;
+                thinkBuffer += partialBuffer;
+                partialBuffer = '';
             } else {
-                // ...append token to normal message flow...
+                // ...append partialBuffer to normal flow...
+                partialBuffer = '';
             }
         }
 
