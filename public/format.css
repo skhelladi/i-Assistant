@@ -1782,3 +1782,22 @@ body.light-mode .web-search-results .search-content::-webkit-scrollbar-thumb {
 body.light-mode .web-search-results li:hover {
     background: rgba(0, 0, 0, 0.02);
 }
+
+/* Think section styles */
+.think-section {
+    background: #1e1e1e;
+    border-left: 3px solid #666;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    font-size: 0.85rem;
+    color: #999;
+    font-style: italic;
+    border-radius: 0 4px 4px 0;
+}
+
+/* Light mode styles for think section */
+body.light-mode .think-section {
+    background: #f5f5f5;
+    border-left: 3px solid #90caf9;
+    color: #666;
+}

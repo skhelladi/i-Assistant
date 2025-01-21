@@ -656,7 +656,16 @@ function displayMessage(message) {
     const content = document.createElement('div');
     content.className = 'message-content';
 
-    content.innerHTML = marked.parse(message.content);
+    // Traiter le contenu pour les sections "think"
+    let processedContent = message.content;
+    if (message.content.includes('<think>')) {
+        processedContent = message.content.replace(
+            /<think>([\s\S]*?)<\/think>/g,
+            (match, p1) => `<div class="think-section">${p1.trim()}</div>`
+        );
+    }
+
+    content.innerHTML = marked.parse(processedContent);
     hljs.highlightAll();
 
     const copyButton = document.createElement('button');
