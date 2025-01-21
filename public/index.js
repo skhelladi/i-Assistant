@@ -537,70 +537,23 @@ async function sendMessage(e) {
 
         let thinkMode = false;
         let thinkBuffer = '';
-        let tagBuffer = '';
-        let isCollectingTag = false;
 
         function handleIncomingToken(token) {
-            // Process token character by character for tag detection
-            for (let char of token) {
-                if (char === '<') {
-                    isCollectingTag = true;
-                    tagBuffer = '<';
-                    continue;
-                }
-                
-                if (isCollectingTag) {
-                    tagBuffer += char;
-                    
-                    // Check for opening tag completion
-                    if (tagBuffer === '<think>') {
-                        isCollectingTag = false;
-                        tagBuffer = '';
-                        thinkMode = true;
-                        continue;
-                    }
-                    
-                    // Check for closing tag completion
-                    if (tagBuffer === '</think>') {
-                        isCollectingTag = false;
-                        tagBuffer = '';
-                        thinkMode = false;
-                        // Process accumulated think buffer
-                        if (thinkBuffer) {
-                            const thinkSection = document.createElement('div');
-                            thinkSection.className = 'think-section';
-                            thinkSection.textContent = thinkBuffer;
-                            messageElement.querySelector('.message-content').appendChild(thinkSection);
-                            thinkBuffer = '';
-                        }
-                        continue;
-                    }
-                    
-                    // If current tag buffer is not a potential think tag, flush it
-                    if (!'<think>'.startsWith(tagBuffer) && !'</think>'.startsWith(tagBuffer)) {
-                        if (thinkMode) {
-                            thinkBuffer += tagBuffer;
-                        } else {
-                            assistantMessage.content += tagBuffer;
-                        }
-                        isCollectingTag = false;
-                        tagBuffer = '';
-                    }
-                    
-                    continue;
-                }
-                
-                // Regular character processing
-                if (thinkMode) {
-                    thinkBuffer += char;
-                } else {
-                    assistantMessage.content += char;
-                }
+            if (token.includes('<think>')) {
+                thinkMode = true;
+                token = token.replace('<think>', '');
             }
-            
-            // Update display if not in think mode
-            if (!thinkMode && messageElement) {
-                messageElement.querySelector('.message-content').innerHTML = marked.parse(assistantMessage.content);
+            if (token.includes('</think>')) {
+                thinkMode = false;
+                token = token.replace('</think>', '');
+                // Flush the buffered content into the think-section
+                updateThinkSection(thinkBuffer);
+                thinkBuffer = '';
+            }
+            if (thinkMode) {
+                thinkBuffer += token;
+            } else {
+                // ...append token to normal message flow...
             }
         }
 
@@ -620,7 +573,19 @@ async function sendMessage(e) {
                             continue;
                         }
                         if (data.content) {
-                            handleIncomingToken(data.content);
+                            fullResponse += data.content;
+                            assistantMessage.content = fullResponse;
+                            if (messageElement) {
+                                messageElement.querySelector('.message-content').innerHTML = marked.parse(fullResponse);
+                                messageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                            }
+
+                            const chatContainer = document.querySelector('.chat-container');
+                            if (chatContainer) {
+                                chatContainer.scrollTop = chatContainer.scrollHeight;
+                            }
+
+                            hljs.highlightAll();
                         }
                         hideLoadingIndicator();
                     } catch (e) {
