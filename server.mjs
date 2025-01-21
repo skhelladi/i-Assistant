@@ -266,7 +266,7 @@ app.get('/api/ollama/models', async (req, res) => {
 const ollamaVersion = ollama.version || 'unknown';
 
 // Start the server only after the database is initialized
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`
     ----------------------------------------
     |          OllamaDesk Server           |
@@ -281,4 +281,15 @@ app.listen(port, () => {
     // Log the server listening at public ip address and port
     console.log(chalk.green(`\thttp://${ip.address()}:${port}`));
     console.log(chalk.red('\nPress Ctrl+C to stop the server'));
+});
+
+// Handle EADDRINUSE error
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.log(`Port ${port} in use, trying a random port...`);
+        server.listen(0); // 0 lets the system pick an available port
+    } else {
+        console.error('Server error:', err);
+        process.exit(1);
+    }
 });
