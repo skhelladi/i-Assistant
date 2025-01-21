@@ -535,6 +535,28 @@ async function sendMessage(e) {
         // Créer l'élément du message uniquement après avoir reçu la première partie de la réponse
         messageElement = displayMessage(assistantMessage);
 
+        let thinkMode = false;
+        let thinkBuffer = '';
+
+        function handleIncomingToken(token) {
+            if (token.includes('<think>')) {
+                thinkMode = true;
+                token = token.replace('<think>', '');
+            }
+            if (token.includes('</think>')) {
+                thinkMode = false;
+                token = token.replace('</think>', '');
+                // Flush the buffered content into the think-section
+                updateThinkSection(thinkBuffer);
+                thinkBuffer = '';
+            }
+            if (thinkMode) {
+                thinkBuffer += token;
+            } else {
+                // ...append token to normal message flow...
+            }
+        }
+
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
